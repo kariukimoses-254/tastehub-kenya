@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteHub | Driver deliveries</title>
+<style>
+  :root{--ink:#21170f;--or:#ed7c2d;--or2:#d9691b;--bg:#f7f3ef;--card:#fff;--line:#e9ddd2;--mut:#766b62;--ok:#1f8a4c;--bad:#c0392b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,Arial,sans-serif}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer;border:0}
+  .top{background:var(--ink);color:#fff;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .top strong{font-size:18px}
+  .top .who{display:flex;align-items:center;gap:14px;font-size:13px;opacity:.95}
+  .top .who span{opacity:.75}
+  .link{background:none;color:#fff;text-decoration:underline;padding:0}
+  .wrap{max-width:1080px;margin:26px auto 60px;padding:0 18px}
+  .card{background:var(--card);padding:22px;border-radius:14px;margin:16px 0;box-shadow:0 5px 24px #24170e0c;border:1px solid #00000008}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+  .stat{padding:16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
+  .stat b{display:block;font-size:26px;line-height:1.1;margin-bottom:4px}
+  .stat small{color:var(--mut)}
+  .muted{color:var(--mut)}
+  h1,h2,h3{margin:0 0 10px}
+  h1{font-size:26px}h2{font-size:21px}h3{font-size:17px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input,select,textarea{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);min-width:0}
+  .btn{background:var(--or);color:#fff;padding:10px 18px;border-radius:9px;font-weight:600}
+  .btn:hover{background:var(--or2)}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:6px 12px;font-size:13px;border-radius:7px}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar label{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#f1e9e1;color:#5d4a3b;white-space:nowrap}
+  .badge.assigned{background:#fdebd8;color:#9a5b12}
+  .badge.picked_up{background:#e8e3fb;color:#5a3ca8}
+  .badge.arrived{background:#e3effd;color:#1f5f9a}
+  .badge.delivered{background:#dff3e6;color:#1f7a3f}
+  .badge.issue{background:#fbe3e1;color:#a52a1f}
+  .badge.cancelled{background:#fbe3e1;color:#a52a1f}
+  .empty{padding:26px;text-align:center;color:var(--mut)}
+  .error{color:var(--bad);font-size:14px;min-height:1.2em}
+  .notice{background:#fff8e8;border:1px solid #f0dfb2;color:#6b5414;border-radius:10px;padding:11px 14px;font-size:13px;margin:12px 0}
+  .modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;padding:18px;z-index:50}
+  .modal.open{display:grid}
+  .modal .box{background:#fff;border-radius:14px;padding:22px;width:min(620px,100%);max-height:88vh;overflow:auto}
+  .modal .box header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  .close{background:none;color:var(--ink);font-size:20px;padding:0 4px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,70px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:60;transition:transform .25s;max-width:90vw}
+  .toast.show{transform:translate(-50%,0)}
+  .hidden{display:none!important}
+  .address{white-space:pre-wrap}
+  .steps{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  @media(max-width:680px){.top{padding:16px 18px}.wrap{padding:0 12px}.card{padding:16px}table{font-size:13px}th,td{padding:8px 5px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <strong>TasteHub · Driver deliveries</strong>
+  <div class="who hidden" id="who">
+    <span id="whoEmail"></span>
+    <button class="link" id="signOut">Sign out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="login">
+    <h1>Driver sign in</h1>
+    <p class="muted">Use the driver account created for you by headquarters. You only see deliveries assigned to you.</p>
+    <form id="loginForm" class="row" style="align-items:stretch">
+      <input id="email" type="email" placeholder="Driver email" autocomplete="username" required style="flex:1;min-width:220px">
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" required style="flex:1;min-width:220px">
+      <button class="btn" type="submit" id="signInBtn">Sign in</button>
+    </form>
+    <p class="error" id="loginMsg" role="alert"></p>
+  </section>
+
+  <section id="dash" class="hidden">
+    <div class="grid" id="stats"></div>
+
+    <section class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>My deliveries</h2>
+        <div class="row">
+          <label class="muted" style="font-size:13px">Status
+            <select id="statusFilter">
+              <option value="">All</option>
+              <option value="assigned">Assigned</option>
+              <option value="picked_up">Picked up</option>
+              <option value="arrived">Arrived</option>
+              <option value="delivered">Delivered</option>
+              <option value="issue">Issue</option>
+            </select>
+          </label>
+          <button class="btn secondary small" id="refresh">Refresh</button>
+        </div>
+      </div>
+      <p class="muted">Open a delivery to see the customer, address and items. Mark pickup when you leave the branch, and mark arrival when you reach the customer.</p>
+      <div id="deliveries"><p class="empty">Loading deliveries…</p></div>
+    </section>
+  </section>
+</main>
+
+<div class="modal" id="detailModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <header><h2 id="detailTitle">Delivery</h2><button class="close" data-close-modal aria-label="Close">✕</button></header>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let token = sessionStorage.getItem('tastehubDriverToken') || '';
+let currentDriver = null;
+
+function esc(value){
+  return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function money(value){ return Number(value || 0).toLocaleString('en-KE'); }
+function when(value){ return value ? new Date(value).toLocaleString() : '—'; }
+function label(status){ return String(status || '').replace(/_/g, ' '); }
+
+let toastTimer;
+function toast(message){
+  const node = $('toast');
+  node.textContent = message;
+  node.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => node.classList.remove('show'), 2800);
+}
+
+async function api(path, options = {}){
+  const headers = {'Content-Type':'application/json', ...(options.headers || {})};
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const response = await fetch(path, {...options, headers});
+  let data = null;
+  try { data = await response.json(); } catch (e) { /* empty body */ }
+  if (!response.ok){
+    if (response.status === 401) signOut(false);
+    throw new Error((data && data.error) || ('Request failed (' + response.status + ')'));
+  }
+  return data;
+}
+
+function signOut(showMessage = true){
+  token = '';
+  sessionStorage.removeItem('tastehubDriverToken');
+  $('who').classList.add('hidden');
+  $('dash').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginMsg').textContent = showMessage ? 'You have signed out.' : '';
+}
+
+async function showDashboard(user){
+  currentDriver = user;
+  $('login').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  $('who').classList.remove('hidden');
+  $('whoEmail').textContent = (user.name || user.email) + (user.branch ? ' · ' + user.branch : '');
+  await loadDeliveries();
+}
+
+function stat(value, text){
+  return '<div class="stat"><b>' + esc(value) + '</b><small>' + esc(text) + '</small></div>';
+}
+
+async function loadDeliveries(){
+  const container = $('deliveries');
+  container.innerHTML = '<p class="empty">Loading deliveries…</p>';
+  try {
+    const params = new URLSearchParams();
+    if ($('statusFilter').value) params.set('status', $('statusFilter').value);
+    const rows = await api('/api/driver/deliveries?' + params.toString());
+    const counts = rows.reduce((acc, row) => { acc[row.status] = (acc[row.status] || 0) + 1; return acc; }, {});
+    $('stats').innerHTML = [
+      stat((counts.assigned || 0) + (counts.picked_up || 0) + (counts.arrived || 0), 'Active deliveries'),
+      stat(counts.picked_up || 0, 'On the way'),
+      stat(counts.arrived || 0, 'Awaiting customer'),
+      stat(counts.delivered || 0, 'Delivered'),
+      stat(counts.issue || 0, 'Issues'),
+    ].join('');
+
+    if (!rows.length){ container.innerHTML = '<p class="empty">No deliveries match this filter.</p>'; return; }
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr><th>Order</th><th>Customer</th><th>Address</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>' +
+      rows.map((delivery) =>
+        '<tr>' +
+          '<td><b>#' + delivery.orderId + '</b></td>' +
+          '<td>' + esc(delivery.customer.name) + '<br><small class="muted">' + esc(delivery.customer.phone) + '</small></td>' +
+          '<td class="address">' + esc(delivery.deliveryAddress || 'Collection at branch') + '</td>' +
+          '<td>KSh ' + money(delivery.totalKes) + '</td>' +
+          '<td><span class="badge ' + esc(delivery.status) + '">' + esc(label(delivery.status)) + '</span>' +
+            (delivery.issue ? '<br><small class="badge issue">' + esc(delivery.issue.label) + '</small>' : '') + '</td>' +
+          '<td><button class="btn secondary small" data-view="' + delivery.id + '">Open</button></td>' +
+        '</tr>').join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+function actionButton(delivery){
+  if (delivery.status === 'assigned'){
+    return '<button class="btn" data-status="' + delivery.id + '" data-next="picked_up">Mark picked up</button>';
+  }
+  if (delivery.status === 'picked_up'){
+    return '<button class="btn" data-status="' + delivery.id + '" data-next="arrived">Mark arrived at customer</button>';
+  }
+  return '';
+}
+
+async function openDelivery(id){
+  try {
+    const delivery = await api('/api/driver/deliveries/' + id);
+    const items = delivery.items.map((item) =>
+      '<tr><td>' + esc(item.name) + '</td><td>' + item.quantity + '</td><td>KSh ' + money(item.lineTotalKes) + '</td></tr>'
+    ).join('');
+    const history = [
+      delivery.assignedAt ? ['Assigned', delivery.assignedAt] : null,
+      delivery.pickedUpAt ? ['Picked up', delivery.pickedUpAt] : null,
+      delivery.arrivedAt ? ['Arrived', delivery.arrivedAt] : null,
+      delivery.confirmedAt ? ['Customer confirmed', delivery.confirmedAt] : null,
+    ].filter(Boolean).map(([name, value]) => '<li>' + esc(name) + ' <small class="muted">' + esc(when(value)) + '</small></li>').join('');
+
+    const arrivalPanel = delivery.status === 'arrived'
+      ? '<div class="notice"><b>Waiting for customer confirmation.</b><br>The customer has been emailed a secure link to confirm receipt or report a problem. You can also open the link on their phone:<br><a href="' + esc(delivery.confirmationUrl) + '" target="_blank" rel="noopener" style="color:var(--or);word-break:break-all">' + esc(delivery.confirmationUrl) + '</a></div>'
+      : '';
+    const issuePanel = delivery.issue
+      ? '<div class="notice"><b>' + esc(delivery.issue.label) + '</b><br>' + esc(delivery.issue.note || '') + '<br><small>Reported ' + esc(when(delivery.issue.reportedAt)) + ' · headquarters and the branch have been notified.</small></div>'
+      : '';
+
+    $('detailTitle').textContent = 'Order #' + delivery.orderId;
+    $('detailBody').innerHTML =
+      '<p><span class="badge ' + esc(delivery.status) + '">' + esc(label(delivery.status)) + '</span> · ' + esc(delivery.branch) + '</p>' +
+      '<p><b>' + esc(delivery.customer.name) + '</b><br>' + esc(delivery.customer.phone) + (delivery.customer.email ? '<br>' + esc(delivery.customer.email) : '') + '</p>' +
+      '<p><b>Deliver to:</b><br><span class="address">' + esc(delivery.deliveryAddress || 'Collection at branch') + '</span></p>' +
+      (delivery.orderNotes ? '<p><b>Customer notes:</b> ' + esc(delivery.orderNotes) + '</p>' : '') +
+      '<table><thead><tr><th>Item</th><th>Qty</th><th>Line</th></tr></thead><tbody>' + items + '</tbody></table>' +
+      '<p style="margin-top:12px"><b>Total KSh ' + money(delivery.totalKes) + '</b></p>' +
+      '<h3 style="margin-top:14px">Progress</h3><ul>' + (history || '<li class="muted">No actions yet.</li>') + '</ul>' +
+      issuePanel + arrivalPanel +
+      '<div class="steps">' + actionButton(delivery) + '</div>' +
+      '<p class="muted" style="font-size:12px">Only the customer can confirm delivery, or HQ can record a phone confirmation.</p>';
+    $('detailModal').classList.add('open');
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function updateStatus(id, status){
+  const button = document.querySelector('[data-status="' + id + '"][data-next="' + status + '"]');
+  if (button) button.disabled = true;
+  try {
+    const result = await api('/api/driver/deliveries/' + id + '/status', {method:'PATCH', body: JSON.stringify({status})});
+    if (status === 'arrived'){
+      const mailed = result.email
+        ? (result.email.status === 'failed' ? ' Email failed: ' + (result.email.error || 'unknown') : result.email.status === 'logged' ? ' Email recorded (SMTP not configured).' : ' Customer emailed the confirmation link.')
+        : ' No customer email on file — share the link shown in the delivery.';
+      toast('Marked arrived.' + mailed);
+    } else {
+      toast('Marked ' + label(status) + '.');
+    }
+    $('detailModal').classList.remove('open');
+    await loadDeliveries();
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+$('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  $('loginMsg').textContent = '';
+  $('signInBtn').disabled = true;
+  try {
+    const result = await api('/api/auth/login', {method:'POST', body: JSON.stringify({email:$('email').value, password:$('password').value})});
+    if (result.user.role !== 'driver') throw new Error('This page is for driver accounts only');
+    token = result.token;
+    sessionStorage.setItem('tastehubDriverToken', token);
+    $('password').value = '';
+    await showDashboard(result.user);
+  } catch (error) {
+    $('loginMsg').textContent = error.message;
+  } finally {
+    $('signInBtn').disabled = false;
+  }
+});
+
+$('signOut').onclick = () => signOut();
+$('refresh').onclick = () => loadDeliveries();
+$('statusFilter').onchange = loadDeliveries;
+
+document.addEventListener('click', (event) => {
+  const view = event.target.closest('[data-view]');
+  if (view) return openDelivery(view.dataset.view);
+  const status = event.target.closest('[data-status]');
+  if (status) return updateStatus(status.dataset.status, status.dataset.next);
+  if (event.target.closest('[data-close-modal]')) $('detailModal').classList.remove('open');
+  if (event.target.id === 'detailModal') $('detailModal').classList.remove('open');
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') $('detailModal').classList.remove('open');
+});
+
+if (token){
+  api('/api/auth/me')
+    .then((result) => {
+      if (result.user.role !== 'driver') throw new Error('Not a driver account');
+      return showDashboard(result.user);
+    })
+    .catch(() => signOut(false));
+}
+</script>
+</body>
+</html>

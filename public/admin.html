@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteHub | Nairobi HQ Admin</title>
+<style>
+  :root{--ink:#21170f;--or:#ed7c2d;--or2:#d9691b;--bg:#f7f3ef;--card:#fff;--line:#e9ddd2;--mut:#766b62;--ok:#1f8a4c;--warn:#b9770e;--bad:#c0392b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,Arial,sans-serif}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer;border:0}
+  .top{background:var(--ink);color:#fff;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .top strong{font-size:18px}
+  .top .who{display:flex;align-items:center;gap:14px;font-size:13px;opacity:.95}
+  .top .who span{opacity:.75}
+  .link{background:none;color:#fff;text-decoration:underline;padding:0}
+  .wrap{max-width:1180px;margin:26px auto 60px;padding:0 18px}
+  .card{background:var(--card);padding:22px;border-radius:14px;margin:16px 0;box-shadow:0 5px 24px #24170e0c;border:1px solid #00000008}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+  .stat{padding:18px;border-radius:13px;background:#fff;border:1px solid var(--line)}
+  .stat b{display:block;font-size:28px;line-height:1.1;margin-bottom:4px}
+  .stat small{color:var(--mut)}
+  .muted{color:var(--mut)}
+  h1,h2,h3{margin:0 0 10px}
+  h1{font-size:26px}h2{font-size:21px}h3{font-size:17px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input,select,textarea{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);min-width:0}
+  input[type=number]{width:110px}
+  .btn{background:var(--or);color:#fff;padding:10px 18px;border-radius:9px;font-weight:600}
+  .btn:hover{background:var(--or2)}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:6px 12px;font-size:13px;border-radius:7px}
+  .btn.danger{background:var(--bad)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
+  .tab{background:#fff;border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:999px;font-weight:600}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar label{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#f1e9e1;color:#5d4a3b;white-space:nowrap}
+  .badge.received,.badge.new{background:#fdebd8;color:#9a5b12}
+  .badge.confirmed,.badge.read{background:#e3effd;color:#1f5f9a}
+  .badge.preparing,.badge.in_progress{background:#fff2cc;color:#8a6500}
+  .badge.ready{background:#e7f5ea;color:#1f7a3f}
+  .badge.out_for_delivery{background:#e8e3fb;color:#5a3ca8}
+  .badge.completed,.badge.resolved{background:#dff3e6;color:#1f7a3f}
+  .badge.cancelled{background:#fbe3e1;color:#a52a1f}
+  .badge.urgent{background:#fbe3e1;color:#a52a1f}
+  .badge.high{background:#fdebd8;color:#9a5b12}
+  .badge.assigned{background:#fdebd8;color:#9a5b12}
+  .badge.picked_up{background:#e8e3fb;color:#5a3ca8}
+  .badge.arrived{background:#e3effd;color:#1f5f9a}
+  .badge.delivered{background:#dff3e6;color:#1f7a3f}
+  .badge.issue{background:#fbe3e1;color:#a52a1f}
+  .delivery-box{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:16px 0;background:#fcfaf7}
+  .delivery-box h3{margin-top:0}
+  .delivery-box .row{margin-top:10px}
+  .delivery-box input[type=datetime-local]{min-width:210px}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+  .dgrid label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut)}
+  .linkbtn{background:none;color:var(--or);text-decoration:underline;padding:0;font:inherit;font-weight:600}
+  .msg{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:#fff}
+  .msg header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .msg .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .msg p{margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+  .empty{padding:26px;text-align:center;color:var(--mut)}
+  .error{color:var(--bad);font-size:14px;min-height:1.2em}
+  .notice{background:#fff8e8;border:1px solid #f0dfb2;color:#6b5414;border-radius:10px;padding:11px 14px;font-size:13px;margin:12px 0}
+  .modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;padding:18px;z-index:50}
+  .modal.open{display:grid}
+  .modal .box{background:#fff;border-radius:14px;padding:22px;width:min(620px,100%);max-height:88vh;overflow:auto}
+  .modal .box header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  .close{background:none;color:var(--ink);font-size:20px;padding:0 4px}
+  .reply{width:100%;min-height:80px;margin-top:8px}
+  .replies{border-left:3px solid var(--line);padding-left:12px;margin:10px 0}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,70px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:60;transition:transform .25s;max-width:90vw}
+  .toast.show{transform:translate(-50%,0)}
+  .hidden{display:none!important}
+  @media(max-width:680px){.top{padding:16px 18px}.wrap{padding:0 12px}.card{padding:16px}table{font-size:13px}th,td{padding:8px 5px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <strong>TasteHub · Nairobi Headquarters</strong>
+  <div class="who hidden" id="who">
+    <span id="whoEmail"></span>
+    <button class="link" id="signOut">Sign out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="login">
+    <h1>Administrator sign in</h1>
+    <p class="muted">Central HQ access only. Branch managers use the <a href="/branch.html" style="color:var(--or)">branch dashboard</a>.</p>
+    <form id="loginForm" class="row" style="align-items:stretch">
+      <input id="email" type="email" placeholder="Administrator email" autocomplete="username" required style="flex:1;min-width:220px">
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" required style="flex:1;min-width:220px">
+      <button class="btn" type="submit" id="signInBtn">Sign in</button>
+    </form>
+    <p class="error" id="loginMsg" role="alert"></p>
+  </section>
+
+  <section id="dash" class="hidden">
+    <div class="grid" id="stats"></div>
+
+    <nav class="tabs" aria-label="Admin sections">
+      <button class="tab on" data-tab="orders">Orders</button>
+      <button class="tab" data-tab="deliveries">Deliveries</button>
+      <button class="tab" data-tab="messages">Messages</button>
+      <button class="tab" data-tab="menu">Menu &amp; prices</button>
+      <button class="tab" data-tab="users">Staff accounts</button>
+    </nav>
+
+    <section class="card" id="panel-orders">
+      <div class="row" style="justify-content:space-between">
+        <h2>Orders</h2>
+        <button class="btn secondary small" data-refresh="orders">Refresh</button>
+      </div>
+      <div class="toolbar">
+        <label>Branch <select id="orderBranch"><option value="">All branches</option></select></label>
+        <label>Status <select id="orderStatus"><option value="">All statuses</option></select></label>
+      </div>
+      <div id="orders"><p class="empty">Loading orders…</p></div>
+    </section>
+
+    <section class="card hidden" id="panel-deliveries">
+      <div class="row" style="justify-content:space-between">
+        <h2>Deliveries</h2>
+        <button class="btn secondary small" data-refresh="deliveries">Refresh</button>
+      </div>
+      <p class="muted">Assign drivers from an order’s detail view, then track pickup, arrival, customer confirmation and problem reports here.</p>
+      <div class="toolbar">
+        <label>Status <select id="deliveryStatus"><option value="">All statuses</option></select></label>
+        <label>Branch <select id="deliveryBranch"><option value="">All branches</option></select></label>
+        <label>Driver <select id="deliveryDriver"><option value="">All drivers</option></select></label>
+      </div>
+      <div id="deliveries"><p class="empty">Loading deliveries…</p></div>
+      <div class="row" style="justify-content:space-between;margin-top:22px">
+        <h3 style="margin:0">Email outbox</h3>
+        <button class="btn secondary small" data-refresh="emails">Refresh</button>
+      </div>
+      <p class="muted" style="font-size:13px">Every customer email is recorded here. Configure SMTP_* to send for real; until then messages are logged.</p>
+      <div id="emails"><p class="empty">Loading email log…</p></div>
+    </section>
+
+    <section class="card hidden" id="panel-messages">
+      <div class="row" style="justify-content:space-between">
+        <h2>Central message inbox</h2>
+        <button class="btn secondary small" data-refresh="messages">Refresh</button>
+      </div>
+      <p class="muted">Every branch message is visible here with origin, destination and status.</p>
+      <div class="toolbar">
+        <label>Status <select id="messageStatus"><option value="">All statuses</option></select></label>
+        <label>Branch <select id="messageBranch"><option value="">All branches</option></select></label>
+      </div>
+      <div id="messages"><p class="empty">Loading messages…</p></div>
+    </section>
+
+    <section class="card hidden" id="panel-menu">
+      <div class="row" style="justify-content:space-between">
+        <h2>Menu &amp; branch prices</h2>
+        <button class="btn secondary small" data-refresh="menu">Refresh</button>
+      </div>
+      <div class="notice">Sample prices only. Confirm approved KES prices and availability for each real outlet before taking live orders.</div>
+      <div class="toolbar">
+        <label>Branch <select id="menuBranch"></select></label>
+      </div>
+      <div id="menu"><p class="empty">Loading menu…</p></div>
+    </section>
+
+    <section class="card hidden" id="panel-users">
+      <h2>Staff accounts</h2>
+      <p class="muted">Create branch managers, outlet staff and drivers. Drivers only see deliveries assigned to them, and each driver is tied to one branch.</p>
+      <form id="userForm" class="toolbar" style="align-items:stretch">
+        <input id="newName" type="text" placeholder="Full name (required)" autocomplete="off" minlength="2" maxlength="150" required style="min-width:180px">
+        <input id="newEmail" type="email" placeholder="Email (required)" autocomplete="off" required style="min-width:200px">
+        <input id="newPassword" type="password" placeholder="Password (12+ characters)" autocomplete="new-password" minlength="12" required style="min-width:200px">
+        <select id="newRole" aria-label="Role" required>
+          <option value="branch_manager">Branch manager</option>
+          <option value="staff">Staff</option>
+          <option value="driver">Driver</option>
+          <option value="central_admin">Central admin</option>
+        </select>
+        <select id="newBranch" aria-label="Branch" required></select>
+        <button class="btn" type="submit">Create account</button>
+      </form>
+      <p class="error" id="userMsg" role="alert"></p>
+      <div id="users"><p class="empty">Loading accounts…</p></div>
+    </section>
+
+    <section class="card">
+      <h2>Recent activity</h2>
+      <div id="activity"><p class="empty">No recent activity.</p></div>
+    </section>
+  </section>
+</main>
+
+<div class="modal" id="detailModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <header><h2 id="detailTitle">Details</h2><button class="close" data-close-modal aria-label="Close">✕</button></header>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const STATUSES = ['received','confirmed','preparing','ready','out_for_delivery','completed','cancelled'];
+const MESSAGE_STATUSES = ['new','read','in_progress','resolved','forwarded'];
+const DELIVERY_STATUSES = ['assigned','picked_up','arrived','delivered','issue','cancelled'];
+const ISSUE_LABELS = {wrong_delivery:'Wrong delivery', breakage:'Breakage or damage', missing_item:'Missing item', late:'Late delivery', other:'Other problem'};
+const ROLE_LABELS = {central_admin:'Central admin', branch_manager:'Branch manager', driver:'Driver', staff:'Staff'};
+const $ = (id) => document.getElementById(id);
+let token = sessionStorage.getItem('tastehubAdminToken') || '';
+let branches = [];
+let drivers = [];
+let currentTab = 'orders';
+
+function deliveryLabel(status){
+  return String(status || '').replace(/_/g, ' ');
+}
+function formatDateTimeLocal(value){
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+}
+
+function esc(value){
+  return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function money(value){ return Number(value || 0).toLocaleString('en-KE'); }
+function when(value){ return value ? new Date(value).toLocaleString() : '—'; }
+
+let toastTimer;
+function toast(message){
+  const node = $('toast');
+  node.textContent = message;
+  node.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => node.classList.remove('show'), 2600);
+}
+
+async function api(path, options = {}){
+  const headers = {'Content-Type':'application/json', ...(options.headers || {})};
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const response = await fetch(path, {...options, headers});
+  let data = null;
+  try { data = await response.json(); } catch (e) { /* empty body */ }
+  if (!response.ok){
+    if (response.status === 401) signOut(false);
+    throw new Error((data && data.error) || ('Request failed (' + response.status + ')'));
+  }
+  return data;
+}
+
+function signOut(showMessage = true){
+  token = '';
+  sessionStorage.removeItem('tastehubAdminToken');
+  $('who').classList.add('hidden');
+  $('dash').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginMsg').textContent = showMessage ? 'You have signed out.' : '';
+}
+
+async function showDashboard(user){
+  $('login').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  $('who').classList.remove('hidden');
+  $('whoEmail').textContent = user.email + ' · ' + (ROLE_LABELS[user.role] || user.role);
+  await loadBranches();
+  await loadDrivers();
+  await Promise.all([loadStats(), loadOrders(), loadMessages(), loadActivity()]);
+}
+
+async function loadBranches(){
+  branches = await api('/api/branches');
+  const options = branches.map((b) => '<option value="' + esc(b.name) + '">' + esc(b.displayName) + '</option>').join('');
+  $('orderBranch').innerHTML = '<option value="">All branches</option>' + options;
+  $('deliveryBranch').innerHTML = '<option value="">All branches</option>' + options;
+  $('messageBranch').innerHTML = '<option value="">All branches</option>' + options;
+  $('menuBranch').innerHTML = options;
+  $('newBranch').innerHTML = options;
+  if (branches.length) $('menuBranch').value = branches[0].name;
+}
+
+async function loadDrivers(){
+  drivers = await api('/api/admin/drivers');
+  $('deliveryDriver').innerHTML = '<option value="">All drivers</option>' + drivers.map((driver) =>
+    '<option value="' + driver.id + '">' + esc(driver.name) + ' · ' + esc(driver.branch) + '</option>'
+  ).join('');
+}
+
+async function loadStats(){
+  const stats = await api('/api/admin/stats');
+  const byStatus = stats.ordersByStatus || {};
+  const deliveries = stats.deliveriesByStatus || {};
+  const activeDeliveries = ['assigned','picked_up','arrived'].reduce((sum, key) => sum + Number(deliveries[key] || 0), 0);
+  const totalOrders = Object.values(byStatus).reduce((sum, n) => sum + Number(n), 0);
+  $('stats').innerHTML = [
+    stat(totalOrders, 'Total orders'),
+    stat('KSh ' + money(stats.revenueTodayKes), 'Completed revenue today'),
+    stat(stats.ordersToday, 'Orders completed today'),
+    stat(activeDeliveries, 'Active deliveries'),
+    stat(stats.openDeliveryIssues || 0, 'Open delivery issues'),
+    stat(stats.activeDrivers || 0, 'Active drivers'),
+    stat(stats.openMessages, 'Open messages'),
+  ].join('');
+}
+function stat(value, label){
+  return '<div class="stat"><b>' + esc(value) + '</b><small>' + esc(label) + '</small></div>';
+}
+
+async function loadActivity(){
+  try {
+    const rows = await api('/api/admin/notifications');
+    $('activity').innerHTML = rows.length
+      ? rows.slice(0, 10).map((row) =>
+          '<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">' +
+            '<span>' + esc(row.message) + '</span>' +
+            '<small class="muted">' + esc(when(row.createdAt)) + '</small>' +
+          '</div>').join('')
+      : '<p class="empty">No recent activity.</p>';
+  } catch (error) {
+    $('activity').innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function loadOrders(){
+  const container = $('orders');
+  container.innerHTML = '<p class="empty">Loading orders…</p>';
+  try {
+    const params = new URLSearchParams();
+    if ($('orderBranch').value) params.set('branch', $('orderBranch').value);
+    if ($('orderStatus').value) params.set('status', $('orderStatus').value);
+    const rows = await api('/api/admin/orders?' + params.toString());
+    if (!rows.length){ container.innerHTML = '<p class="empty">No orders match these filters.</p>'; return; }
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr><th>Order</th><th>Branch</th><th>Customer</th><th>Total</th><th>Status</th><th>Delivery</th><th>Placed</th><th>Next step</th></tr></thead><tbody>' +
+      rows.map((order) => {
+        const options = STATUSES.map((status) =>
+          '<option value="' + status + '"' + (status === order.status ? ' selected' : '') + '>' + status.replace(/_/g, ' ') + '</option>'
+        ).join('');
+        const deliveryCell = order.delivery
+          ? '<button class="linkbtn" data-delivery-view="' + order.delivery.id + '"><span class="badge ' + esc(order.delivery.status) + '">' + esc(deliveryLabel(order.delivery.status)) + '</span></button>' +
+            '<br><small class="muted">' + esc(order.delivery.driver.name || 'Driver') + '</small>'
+          : '<small class="muted">' + (order.deliveryType === 'delivery' ? 'Not assigned' : 'Collection') + '</small>';
+        return '<tr>' +
+          '<td><button class="link" style="color:var(--or);text-decoration:underline" data-order-view="' + order.id + '">#' + order.id + '</button></td>' +
+          '<td>' + esc(order.branch) + '</td>' +
+          '<td>' + esc(order.customer.name) + '<br><small class="muted">' + esc(order.customer.phone) + '</small></td>' +
+          '<td>KSh ' + money(order.totalKes) + '</td>' +
+          '<td><span class="badge ' + esc(order.status) + '">' + esc(order.status.replace(/_/g, ' ')) + '</span></td>' +
+          '<td>' + deliveryCell + '</td>' +
+          '<td><small>' + esc(when(order.createdAt)) + '</small></td>' +
+          '<td><div class="row"><select data-order-status="' + order.id + '" aria-label="New status for order ' + order.id + '">' + options + '</select>' +
+          '<button class="btn small" data-order-save="' + order.id + '">Update</button></div></td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function updateOrderStatus(id){
+  const select = document.querySelector('[data-order-status="' + id + '"]');
+  if (!select) return;
+  try {
+    await api('/api/admin/orders/' + id + '/status', {method:'PATCH', body: JSON.stringify({status: select.value})});
+    toast('Order #' + id + ' updated to ' + select.value.replace(/_/g, ' '));
+    await Promise.all([loadOrders(), loadStats(), loadActivity()]);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function openOrder(id){
+  try {
+    const order = await api('/api/admin/orders/' + id);
+    const items = order.items.map((item) =>
+      '<tr><td>' + esc(item.name) + '</td><td>' + item.quantity + '</td><td>KSh ' + money(item.unitPriceKes) + '</td><td>KSh ' + money(item.lineTotalKes) + '</td></tr>'
+    ).join('');
+    const history = order.history.map((entry) =>
+      '<li>' + esc(entry.to.replace(/_/g, ' ')) + ' <small class="muted">' + esc(when(entry.createdAt)) + (entry.changedBy ? ' · ' + esc(entry.changedBy) : '') + (entry.note ? ' · ' + esc(entry.note) : '') + '</small></li>'
+    ).join('');
+    $('detailTitle').textContent = 'Order #' + order.id;
+    $('detailBody').innerHTML =
+      '<p><span class="badge ' + esc(order.status) + '">' + esc(order.status.replace(/_/g, ' ')) + '</span> · ' + esc(order.branch) + ' · ' + esc(order.deliveryType) + '</p>' +
+      '<p><b>' + esc(order.customer.name) + '</b><br>' + esc(order.customer.phone) + (order.customer.email ? '<br>' + esc(order.customer.email) : '') + '</p>' +
+      (order.deliveryAddress ? '<p><b>Deliver to:</b> ' + esc(order.deliveryAddress) + '</p>' : '') +
+      '<table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line</th></tr></thead><tbody>' + items + '</tbody></table>' +
+      '<p style="margin-top:12px">Subtotal KSh ' + money(order.subtotalKes) + ' · Discount KSh ' + money(order.discountKes) + ' · Delivery KSh ' + money(order.deliveryFeeKes) + ' · <b>Total KSh ' + money(order.totalKes) + '</b></p>' +
+      (order.notes ? '<p><b>Notes:</b> ' + esc(order.notes) + '</p>' : '') +
+      deliverySectionForOrder(order) +
+      '<h3 style="margin-top:16px">Status history</h3><ul>' + history + '</ul>';
+    $('detailModal').classList.add('open');
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+function scheduleFields(delivery){
+  return '<div class="dgrid">' +
+    '<label>Next delivery ready <span class="muted">(optional)</span><input type="datetime-local" id="nextReadyAt" value="' + esc(formatDateTimeLocal(delivery && delivery.nextReadyAt)) + '"></label>' +
+    '<label>Next delivery date <span class="muted">(optional)</span><input type="datetime-local" id="nextDeliveryAt" value="' + esc(formatDateTimeLocal(delivery && delivery.nextDeliveryAt)) + '"></label>' +
+  '</div>';
+}
+
+function deliverySectionForOrder(order){
+  if (order.deliveryType !== 'delivery'){
+    return '<div class="delivery-box"><h3>Delivery</h3><p class="muted">This is a collection order, so no driver assignment is needed.</p></div>';
+  }
+  const delivery = order.delivery;
+  if (!delivery){
+    const choices = drivers.filter((driver) => driver.branch === order.branch);
+    if (!choices.length){
+      return '<div class="delivery-box"><h3>Assign a driver</h3>' +
+        '<p class="notice">No active driver is registered for ' + esc(order.branch) + '. Create one in <b>Staff accounts</b> first.</p></div>';
+    }
+    return '<div class="delivery-box"><h3>Assign a driver</h3>' +
+      '<p class="muted">Choose an active driver from ' + esc(order.branch) + '. The customer confirmation link is created automatically.</p>' +
+      '<div class="row"><select id="assignDriverSelect" aria-label="Driver" required>' +
+        choices.map((driver) => '<option value="' + driver.id + '">' + esc(driver.name) + ' · ' + driver.activeDeliveries + ' active</option>').join('') +
+      '</select><button class="btn small" data-assign-driver="' + order.id + '">Assign delivery</button></div>' +
+      scheduleFields(null) +
+      '<p class="muted" style="font-size:12px">Next-delivery dates are optional. The customer receives them in the confirmation email.</p></div>';
+  }
+
+  const label = deliveryLabel(delivery.status);
+  const times = [
+    delivery.assignedAt ? 'Assigned ' + when(delivery.assignedAt) : null,
+    delivery.pickedUpAt ? 'Picked up ' + when(delivery.pickedUpAt) : null,
+    delivery.arrivedAt ? 'Arrived ' + when(delivery.arrivedAt) : null,
+    delivery.confirmedAt ? 'Confirmed ' + when(delivery.confirmedAt) + (delivery.confirmedBy ? ' by ' + delivery.confirmedBy : '') : null,
+  ].filter(Boolean).join(' · ');
+  const issue = delivery.issue
+    ? '<div class="notice"><b>' + esc(delivery.issue.label) + '</b><br>' + esc(delivery.issue.note || '') + '<br><small>Reported ' + esc(when(delivery.issue.reportedAt)) + '</small></div>'
+    : '';
+  const actions = [];
+  if (delivery.status === 'arrived'){
+    actions.push('<button class="btn small" data-confirm-delivery="' + delivery.id + '">Record phone confirmation</button>');
+    actions.push('<button class="btn secondary small" data-send-link="' + delivery.id + '">Email confirmation link</button>');
+  }
+  if (delivery.status === 'issue'){
+    actions.push('<textarea id="issueResolution" class="reply" maxlength="500" aria-label="Issue resolution note (optional)" placeholder="How was the problem resolved? (optional)"></textarea>');
+    actions.push('<button class="btn small" data-resolve-issue="' + delivery.id + '">Resolve issue</button>');
+  }
+  return '<div class="delivery-box">' +
+    '<h3>Delivery <span class="badge ' + esc(delivery.status) + '">' + esc(label) + '</span></h3>' +
+    '<p><b>Driver:</b> ' + esc(delivery.driver.name || delivery.driver.email) + ' <small class="muted">' + esc(delivery.driver.email || '') + '</small></p>' +
+    (times ? '<p class="muted" style="font-size:13px">' + esc(times) + '</p>' : '') +
+    issue +
+    '<label class="muted" style="display:block;margin-top:10px">Customer confirmation link</label>' +
+    '<input type="text" readonly value="' + esc(delivery.confirmationUrl || '') + '" style="width:100%" aria-label="Customer confirmation link">' +
+    '<p class="muted" style="font-size:12px">The link works without a login. It lets the customer confirm receipt or report a problem once the driver marks arrival.</p>' +
+    scheduleFields(delivery) +
+    '<div class="row"><button class="btn secondary small" data-schedule-delivery="' + delivery.id + '">Save next-delivery dates</button>' + actions.join('') + '</div>' +
+  '</div>';
+}
+
+async function loadDeliveries(){
+  const container = $('deliveries');
+  container.innerHTML = '<p class="empty">Loading deliveries…</p>';
+  try {
+    const params = new URLSearchParams();
+    if ($('deliveryStatus').value) params.set('status', $('deliveryStatus').value);
+    if ($('deliveryBranch').value) params.set('branch', $('deliveryBranch').value);
+    if ($('deliveryDriver').value) params.set('driverId', $('deliveryDriver').value);
+    const rows = await api('/api/admin/deliveries?' + params.toString());
+    if (!rows.length){ container.innerHTML = '<p class="empty">No deliveries match these filters.</p>'; return; }
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr><th>Order</th><th>Branch</th><th>Customer</th><th>Driver</th><th>Status</th><th>Issue</th><th>Updated</th><th></th></tr></thead><tbody>' +
+      rows.map((delivery) =>
+        '<tr>' +
+          '<td><button class="linkbtn" data-delivery-view="' + delivery.id + '">#' + delivery.orderId + '</button></td>' +
+          '<td>' + esc(delivery.branch) + '</td>' +
+          '<td>' + esc(delivery.customer.name) + '<br><small class="muted">' + esc(delivery.customer.phone) + '</small></td>' +
+          '<td>' + esc(delivery.driver.name) + '<br><small class="muted">' + esc(delivery.driver.email) + '</small></td>' +
+          '<td><span class="badge ' + esc(delivery.status) + '">' + esc(deliveryLabel(delivery.status)) + '</span></td>' +
+          '<td>' + (delivery.issue ? '<span class="badge issue">' + esc(delivery.issue.label) + '</span>' : '<small class="muted">—</small>') + '</td>' +
+          '<td><small>' + esc(when(delivery.confirmedAt || delivery.arrivedAt || delivery.pickedUpAt || delivery.assignedAt)) + '</small></td>' +
+          '<td><button class="btn secondary small" data-delivery-view="' + delivery.id + '">Open</button></td>' +
+        '</tr>').join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+function deliveryDetailBody(delivery){
+  const items = (delivery.items || []).map((item) =>
+    '<tr><td>' + esc(item.name) + '</td><td>' + item.quantity + '</td><td>KSh ' + money(item.unitPriceKes) + '</td><td>KSh ' + money(item.lineTotalKes) + '</td></tr>'
+  ).join('');
+  const times = [
+    delivery.assignedAt ? ['Assigned', delivery.assignedAt] : null,
+    delivery.pickedUpAt ? ['Picked up', delivery.pickedUpAt] : null,
+    delivery.arrivedAt ? ['Arrived', delivery.arrivedAt] : null,
+    delivery.confirmedAt ? ['Confirmed', delivery.confirmedAt] : null,
+  ].filter(Boolean).map(([label, value]) => '<li>' + esc(label) + ' <small class="muted">' + esc(when(value)) + '</small></li>').join('');
+  const issue = delivery.issue
+    ? '<div class="notice"><b>' + esc(delivery.issue.label) + '</b><br>' + esc(delivery.issue.note || '') +
+      '<br><small>Reported ' + esc(when(delivery.issue.reportedAt)) + '</small></div>'
+    : '';
+  const actions = [];
+  if (delivery.status === 'arrived'){
+    actions.push('<button class="btn small" data-confirm-delivery="' + delivery.id + '">Record phone confirmation</button>');
+    actions.push('<button class="btn secondary small" data-send-link="' + delivery.id + '">Email confirmation link</button>');
+  }
+  if (delivery.status === 'issue'){
+    actions.push('<textarea id="issueResolution" class="reply" maxlength="500" aria-label="Issue resolution note (optional)" placeholder="How was the problem resolved? (optional)"></textarea>');
+    actions.push('<button class="btn small" data-resolve-issue="' + delivery.id + '">Resolve issue</button>');
+  }
+  return '<p><span class="badge ' + esc(delivery.status) + '">' + esc(deliveryLabel(delivery.status)) + '</span> · Order #' + delivery.orderId + ' · ' + esc(delivery.branch) + ' · ' + esc(delivery.deliveryType || 'delivery') + '</p>' +
+    '<p><b>' + esc(delivery.customer.name) + '</b><br>' + esc(delivery.customer.phone) + (delivery.customer.email ? '<br>' + esc(delivery.customer.email) : '<br><span class="badge issue">No email on file</span>') + '</p>' +
+    (delivery.deliveryAddress ? '<p><b>Deliver to:</b> ' + esc(delivery.deliveryAddress) + '</p>' : '') +
+    (delivery.orderNotes ? '<p><b>Order notes:</b> ' + esc(delivery.orderNotes) + '</p>' : '') +
+    '<table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line</th></tr></thead><tbody>' + items + '</tbody></table>' +
+    '<p style="margin-top:12px"><b>Total KSh ' + money(delivery.totalKes) + '</b></p>' +
+    '<p><b>Driver:</b> ' + esc(delivery.driver.name) + ' <small class="muted">' + esc(delivery.driver.email) + '</small></p>' +
+    '<h3 style="margin-top:14px">Timeline</h3><ul>' + (times || '<li class="muted">No timestamps yet.</li>') + '</ul>' +
+    issue +
+    '<label class="muted" style="display:block;margin-top:10px">Customer confirmation link</label>' +
+    '<input type="text" readonly value="' + esc(delivery.confirmationUrl || '') + '" style="width:100%" aria-label="Customer confirmation link">' +
+    '<p class="muted" style="font-size:12px">Share this link with the customer if they cannot open their email. It works without a login.</p>' +
+    scheduleFields(delivery) +
+    '<div class="row"><button class="btn secondary small" data-schedule-delivery="' + delivery.id + '">Save next-delivery dates</button>' + actions.join('') + '</div>';
+}
+
+async function openDelivery(id){
+  try {
+    const delivery = await api('/api/admin/deliveries/' + id);
+    $('detailTitle').textContent = 'Delivery · Order #' + delivery.orderId;
+    $('detailBody').innerHTML = deliveryDetailBody(delivery);
+    $('detailModal').classList.add('open');
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function assignDriver(orderId){
+  const select = $('assignDriverSelect');
+  if (!select) return;
+  if (!select.value){ toast('Choose a driver to assign.'); select.focus(); return; }
+  try {
+    await api('/api/admin/orders/' + orderId + '/assign-driver', {method:'POST', body: JSON.stringify({
+      driverId: Number(select.value),
+      nextReadyAt: ($('nextReadyAt') && $('nextReadyAt').value) || null,
+      nextDeliveryAt: ($('nextDeliveryAt') && $('nextDeliveryAt').value) || null,
+    })});
+    toast('Driver assigned. Confirmation link created.');
+    await Promise.all([loadOrders(), loadDeliveries(), loadStats(), loadActivity()]);
+    await openOrder(orderId);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function scheduleDelivery(id){
+  try {
+    const result = await api('/api/admin/deliveries/' + id + '/schedule', {method:'PATCH', body: JSON.stringify({
+      nextReadyAt: ($('nextReadyAt') && $('nextReadyAt').value) || null,
+      nextDeliveryAt: ($('nextDeliveryAt') && $('nextDeliveryAt').value) || null,
+    })});
+    const emailed = result.email
+      ? (result.email.status === 'failed' ? ' Email failed: ' + (result.email.error || 'unknown error') : ' Customer emailed.')
+      : ' No customer email on file.';
+    toast('Next-delivery dates saved.' + emailed);
+    await Promise.all([loadOrders(), loadDeliveries(), loadEmails(), loadStats()]);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function confirmDeliveryAdmin(id){
+  if (!window.confirm('Record this delivery as confirmed? Only do this when the customer has confirmed by phone or in person.')) return;
+  try {
+    const result = await api('/api/admin/deliveries/' + id + '/confirm', {method:'POST'});
+    toast(result.duplicate ? 'This delivery was already confirmed.' : 'Delivery confirmed.' + (result.email ? ' Customer emailed.' : ''));
+    $('detailModal').classList.remove('open');
+    await Promise.all([loadOrders(), loadDeliveries(), loadEmails(), loadStats(), loadActivity()]);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function resolveDeliveryIssue(id){
+  const note = ($('issueResolution') && $('issueResolution').value.trim()) || '';
+  try {
+    await api('/api/admin/deliveries/' + id + '/resolve-issue', {method:'PATCH', body: JSON.stringify({note})});
+    toast('Issue resolved. The delivery is back to arrived.');
+    $('detailModal').classList.remove('open');
+    await Promise.all([loadDeliveries(), loadStats(), loadActivity()]);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function sendConfirmationLink(id){
+  try {
+    const result = await api('/api/admin/deliveries/' + id + '/send-link', {method:'POST'});
+    const mailed = result.email && result.email.status === 'logged'
+      ? 'Email recorded (SMTP not configured).'
+      : (result.email && result.email.status === 'failed' ? 'Email failed: ' + (result.email.error || 'unknown') : 'Confirmation email sent.');
+    toast(mailed);
+    await loadEmails();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function loadEmails(){
+  const container = $('emails');
+  if (!container) return;
+  try {
+    const rows = await api('/api/admin/emails');
+    if (!rows.length){ container.innerHTML = '<p class="empty">No emails recorded yet.</p>'; return; }
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr><th>When</th><th>Order</th><th>Kind</th><th>Recipient</th><th>Status</th><th>Subject</th></tr></thead><tbody>' +
+      rows.map((email) =>
+        '<tr>' +
+          '<td><small>' + esc(when(email.createdAt)) + '</small></td>' +
+          '<td>' + (email.orderId ? '#' + email.orderId : '—') + '</td>' +
+          '<td>' + esc(String(email.kind || '').replace(/_/g, ' ')) + '</td>' +
+          '<td>' + esc(email.recipient) + '</td>' +
+          '<td><span class="badge ' + (email.status === 'sent' ? 'completed' : email.status === 'failed' ? 'issue' : 'confirmed') + '">' + esc(email.status) + '</span>' +
+            (email.error ? '<br><small class="muted">' + esc(email.error) + '</small>' : '') + '</td>' +
+          '<td>' + esc(email.subject) + '</td>' +
+        '</tr>').join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function loadMessages(){
+  const container = $('messages');
+  container.innerHTML = '<p class="empty">Loading messages…</p>';
+  try {
+    const params = new URLSearchParams();
+    if ($('messageStatus').value) params.set('status', $('messageStatus').value);
+    if ($('messageBranch').value) params.set('branch', $('messageBranch').value);
+    const rows = await api('/api/admin/messages?' + params.toString());
+    if (!rows.length){ container.innerHTML = '<p class="empty">No messages match these filters.</p>'; return; }
+    container.innerHTML = rows.map((message) => {
+      const route = esc(message.fromBranch) + ' → ' + esc(message.toBranch || 'Headquarters');
+      return '<article class="msg">' +
+        '<header><div><b>' + esc(message.subject || 'Branch message') + '</b><div class="muted">' + route + ' · ' + esc(message.senderName || 'Unknown sender') + (message.senderEmail ? ' · ' + esc(message.senderEmail) : '') + '</div></div>' +
+        '<div><span class="badge ' + esc(message.priority) + '">' + esc(message.priority) + '</span> <span class="badge ' + esc(message.status) + '">' + esc(message.status.replace(/_/g, ' ')) + '</span></div></header>' +
+        '<p>' + esc(message.message) + '</p>' +
+        '<small class="muted">' + esc(when(message.createdAt)) + (message.replyCount ? ' · ' + message.replyCount + ' repl' + (message.replyCount === 1 ? 'y' : 'ies') : '') + '</small>' +
+        '<div class="actions">' +
+          '<button class="btn secondary small" data-message-view="' + message.id + '">Open &amp; reply</button>' +
+          (message.status !== 'read' && message.status !== 'resolved' ? '<button class="btn secondary small" data-message-read="' + message.id + '">Mark read</button>' : '') +
+          (message.status !== 'resolved' ? '<button class="btn secondary small" data-message-resolve="' + message.id + '">Resolve</button>' : '') +
+        '</div>' +
+      '</article>';
+    }).join('');
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function setMessageStatus(id, status){
+  try {
+    await api('/api/admin/messages/' + id, {method:'PATCH', body: JSON.stringify({status})});
+    toast('Message #' + id + ' marked ' + status.replace(/_/g, ' '));
+    await Promise.all([loadMessages(), loadStats()]);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function openMessage(id){
+  try {
+    const message = await api('/api/admin/messages/' + id);
+    const replies = message.replies.length
+      ? message.replies.map((reply) =>
+          '<div class="replies"><b>' + esc(reply.author) + '</b> <small class="muted">' + esc(when(reply.createdAt)) + '</small><p>' + esc(reply.text) + '</p></div>'
+        ).join('')
+      : '<p class="muted">No replies yet.</p>';
+    const statusOptions = MESSAGE_STATUSES.map((status) =>
+      '<option value="' + status + '"' + (status === message.status ? ' selected' : '') + '>' + status.replace(/_/g, ' ') + '</option>'
+    ).join('');
+    $('detailTitle').textContent = message.subject || 'Branch message';
+    $('detailBody').innerHTML =
+      '<p class="muted">' + esc(message.fromBranch) + ' → ' + esc(message.toBranch || 'Headquarters') + ' · ' + esc(message.senderName || 'Unknown sender') + ' · ' + esc(when(message.createdAt)) + '</p>' +
+      '<p style="white-space:pre-wrap">' + esc(message.message) + '</p>' +
+      '<h3>Replies</h3>' + replies +
+      '<label class="muted" style="display:block;margin-top:12px">Status <select id="replyStatus" aria-label="Message status">' + statusOptions + '</select></label>' +
+      '<textarea id="replyText" class="reply" maxlength="5000" required aria-label="Reply message (required)" placeholder="Write a reply…"></textarea>' +
+      '<div class="row" style="margin-top:10px"><button class="btn" id="sendReply">Send reply</button><span class="error" id="replyMsg" role="alert"></span></div>';
+    $('sendReply').onclick = async () => {
+      const reply = $('replyText').value.trim();
+      const status = $('replyStatus').value;
+      if (!reply){ $('replyMsg').textContent = 'Write a reply first.'; return; }
+      $('sendReply').disabled = true;
+      try {
+        await api('/api/admin/messages/' + id, {method:'PATCH', body: JSON.stringify({reply, status})});
+        toast('Reply sent');
+        $('detailModal').classList.remove('open');
+        await Promise.all([loadMessages(), loadStats()]);
+      } catch (error) {
+        $('replyMsg').textContent = error.message;
+      } finally {
+        $('sendReply').disabled = false;
+      }
+    };
+    $('detailModal').classList.add('open');
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function loadMenu(){
+  const container = $('menu');
+  container.innerHTML = '<p class="empty">Loading menu…</p>';
+  try {
+    const rows = await api('/api/admin/meals?branch=' + encodeURIComponent($('menuBranch').value));
+    if (!rows.length){ container.innerHTML = '<p class="empty">No menu items configured for this branch.</p>'; return; }
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr><th>Dish</th><th>Category</th><th>Price (KSh)</th><th>Available</th><th></th></tr></thead><tbody>' +
+      rows.map((meal) =>
+        '<tr data-meal-row="' + meal.id + '">' +
+          '<td><b>' + esc(meal.name) + '</b><br><small class="muted">' + esc(meal.description || '') + '</small></td>' +
+          '<td>' + esc(meal.category) + '</td>' +
+          '<td><input type="number" min="0" max="1000000" step="5" value="' + Number(meal.priceKes) + '" data-meal-price="' + meal.id + '" required aria-label="Price for ' + esc(meal.name) + '"></td>' +
+          '<td><input type="checkbox" data-meal-available="' + meal.id + '"' + (meal.available ? ' checked' : '') + ' aria-label="Available at this branch"></td>' +
+          '<td><button class="btn small" data-meal-save="' + meal.id + '">Save</button></td>' +
+        '</tr>').join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function saveMeal(id){
+  const price = document.querySelector('[data-meal-price="' + id + '"]');
+  const available = document.querySelector('[data-meal-available="' + id + '"]');
+  if (!price || !available) return;
+  const priceKes = Number(price.value);
+  if (price.value === '' || !Number.isFinite(priceKes) || priceKes < 0){
+    toast('Enter a valid price before saving.');
+    price.focus();
+    return;
+  }
+  try {
+    await api('/api/admin/meals/' + id, {method:'PATCH', body: JSON.stringify({priceKes, available: available.checked})});
+    toast('Menu item saved');
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function loadUsers(){
+  const container = $('users');
+  container.innerHTML = '<p class="empty">Loading accounts…</p>';
+  try {
+    const rows = await api('/api/admin/users');
+    if (!rows.length){ container.innerHTML = '<p class="empty">No accounts yet.</p>'; return; }
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Branch</th><th>Active</th><th>Last sign-in</th><th></th></tr></thead><tbody>' +
+      rows.map((user) =>
+        '<tr>' +
+          '<td>' + esc(user.name || '—') + '</td>' +
+          '<td>' + esc(user.email) + '</td>' +
+          '<td>' + esc(ROLE_LABELS[user.role] || user.role) + '</td>' +
+          '<td>' + esc(user.branch || '—') + '</td>' +
+          '<td><span class="badge ' + (user.active ? 'completed' : 'cancelled') + '">' + (user.active ? 'active' : 'disabled') + '</span></td>' +
+          '<td><small>' + esc(when(user.lastLoginAt)) + '</small></td>' +
+          '<td><button class="btn secondary small" data-user-toggle="' + user.id + '" data-user-active="' + (user.active ? '1' : '0') + '">' + (user.active ? 'Disable' : 'Enable') + '</button></td>' +
+        '</tr>').join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function toggleUser(id, active){
+  try {
+    await api('/api/admin/users/' + id, {method:'PATCH', body: JSON.stringify({active})});
+    toast('Account ' + (active ? 'enabled' : 'disabled'));
+    await loadUsers();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+// ---------------------------------------------------------------- events
+$('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  $('loginMsg').textContent = '';
+  $('signInBtn').disabled = true;
+  try {
+    const result = await api('/api/auth/login', {method:'POST', body: JSON.stringify({email:$('email').value, password:$('password').value})});
+    if (result.user.role !== 'central_admin') throw new Error('This page is for central administrators only');
+    token = result.token;
+    sessionStorage.setItem('tastehubAdminToken', token);
+    $('password').value = '';
+    await showDashboard(result.user);
+  } catch (error) {
+    $('loginMsg').textContent = error.message;
+  } finally {
+    $('signInBtn').disabled = false;
+  }
+});
+
+$('signOut').onclick = () => signOut();
+
+document.querySelectorAll('[data-tab]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    currentTab = button.dataset.tab;
+    document.querySelectorAll('[data-tab]').forEach((tab) => tab.classList.toggle('on', tab === button));
+    ['orders','deliveries','messages','menu','users'].forEach((name) => $('panel-' + name).classList.toggle('hidden', name !== currentTab));
+    if (currentTab === 'orders') await loadOrders();
+    if (currentTab === 'deliveries') await Promise.all([loadDeliveries(), loadEmails(), loadDrivers()]);
+    if (currentTab === 'messages') await loadMessages();
+    if (currentTab === 'menu') await loadMenu();
+    if (currentTab === 'users') await loadUsers();
+  });
+});
+
+document.querySelectorAll('[data-refresh]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const target = button.dataset.refresh;
+    if (target === 'orders') await Promise.all([loadOrders(), loadStats()]);
+    if (target === 'deliveries') await Promise.all([loadDeliveries(), loadStats()]);
+    if (target === 'emails') await loadEmails();
+    if (target === 'messages') await Promise.all([loadMessages(), loadStats()]);
+    if (target === 'menu') await loadMenu();
+    if (target === 'users') await loadUsers();
+  });
+});
+
+$('orderBranch').onchange = loadOrders;
+$('orderStatus').onchange = loadOrders;
+$('deliveryStatus').onchange = loadDeliveries;
+$('deliveryBranch').onchange = loadDeliveries;
+$('deliveryDriver').onchange = loadDeliveries;
+$('messageStatus').onchange = loadMessages;
+$('messageBranch').onchange = loadMessages;
+$('menuBranch').onchange = loadMenu;
+
+document.addEventListener('click', (event) => {
+  const view = event.target.closest('[data-order-view]');
+  if (view) return openOrder(view.dataset.orderView);
+  const deliveryView = event.target.closest('[data-delivery-view]');
+  if (deliveryView) return openDelivery(deliveryView.dataset.deliveryView);
+  const assign = event.target.closest('[data-assign-driver]');
+  if (assign) return assignDriver(assign.dataset.assignDriver);
+  const schedule = event.target.closest('[data-schedule-delivery]');
+  if (schedule) return scheduleDelivery(schedule.dataset.scheduleDelivery);
+  const confirmDelivery = event.target.closest('[data-confirm-delivery]');
+  if (confirmDelivery) return confirmDeliveryAdmin(confirmDelivery.dataset.confirmDelivery);
+  const resolveIssue = event.target.closest('[data-resolve-issue]');
+  if (resolveIssue) return resolveDeliveryIssue(resolveIssue.dataset.resolveIssue);
+  const sendLink = event.target.closest('[data-send-link]');
+  if (sendLink) return sendConfirmationLink(sendLink.dataset.sendLink);
+  const save = event.target.closest('[data-order-save]');
+  if (save) return updateOrderStatus(save.dataset.orderSave);
+  const messageView = event.target.closest('[data-message-view]');
+  if (messageView) return openMessage(messageView.dataset.messageView);
+  const messageRead = event.target.closest('[data-message-read]');
+  if (messageRead) return setMessageStatus(messageRead.dataset.messageRead, 'read');
+  const messageResolve = event.target.closest('[data-message-resolve]');
+  if (messageResolve) return setMessageStatus(messageResolve.dataset.messageResolve, 'resolved');
+  const mealSave = event.target.closest('[data-meal-save]');
+  if (mealSave) return saveMeal(mealSave.dataset.mealSave);
+  const userToggle = event.target.closest('[data-user-toggle]');
+  if (userToggle) return toggleUser(userToggle.dataset.userToggle, userToggle.dataset.userActive !== '1');
+  if (event.target.closest('[data-close-modal]')) $('detailModal').classList.remove('open');
+  if (event.target.id === 'detailModal') $('detailModal').classList.remove('open');
+});
+
+$('userForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  $('userMsg').textContent = '';
+  try {
+    await api('/api/admin/users', {method:'POST', body: JSON.stringify({
+      name: $('newName').value,
+      email: $('newEmail').value,
+      password: $('newPassword').value,
+      role: $('newRole').value,
+      branch: $('newBranch').value,
+    })});
+    $('newName').value = '';
+    $('newEmail').value = '';
+    $('newPassword').value = '';
+    toast('Staff account created');
+    await Promise.all([loadUsers(), loadDrivers()]);
+  } catch (error) {
+    $('userMsg').textContent = error.message;
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') $('detailModal').classList.remove('open');
+});
+
+// Populate filter menus.
+$('orderStatus').innerHTML += STATUSES.map((status) => '<option value="' + status + '">' + status.replace(/_/g, ' ') + '</option>').join('');
+$('deliveryStatus').innerHTML += DELIVERY_STATUSES.map((status) => '<option value="' + status + '">' + deliveryLabel(status) + '</option>').join('');
+$('messageStatus').innerHTML += MESSAGE_STATUSES.map((status) => '<option value="' + status + '">' + status.replace(/_/g, ' ') + '</option>').join('');
+
+// Restore a session when the page reloads.
+if (token){
+  api('/api/auth/me')
+    .then((result) => {
+      if (result.user.role !== 'central_admin') throw new Error('Not an administrator account');
+      return showDashboard(result.user);
+    })
+    .catch(() => signOut(false));
+}
+</script>
+</body>
+</html>

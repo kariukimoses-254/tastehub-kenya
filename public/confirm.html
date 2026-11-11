@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteHub | Confirm your delivery</title>
+<style>
+  :root{--ink:#21170f;--or:#ed7c2d;--or2:#d9691b;--bg:#f7f3ef;--card:#fff;--line:#e9ddd2;--mut:#766b62;--ok:#1f8a4c;--bad:#c0392b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,Arial,sans-serif}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer;border:0}
+  .top{background:var(--ink);color:#fff;padding:20px 5%}
+  .top strong{font-size:19px}
+  .top small{display:block;opacity:.7;font-size:12px;margin-top:2px}
+  .wrap{max-width:620px;margin:24px auto 60px;padding:0 16px}
+  .card{background:var(--card);padding:24px;border-radius:16px;margin:16px 0;box-shadow:0 8px 30px #24170e10;border:1px solid #00000008}
+  h1{font-size:24px;margin:0 0 10px}
+  h2{font-size:18px;margin:18px 0 8px}
+  .muted{color:var(--mut)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{background:var(--or);color:#fff;padding:13px 20px;border-radius:10px;font-weight:600;font-size:16px}
+  .btn:hover{background:var(--or2)}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.danger{background:var(--bad)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn.block{width:100%;text-align:center}
+  select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  textarea{min-height:110px;resize:vertical}
+  label{display:block;font-size:13px;color:var(--mut);margin:12px 0 5px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+  th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+  .total{display:flex;justify-content:space-between;gap:12px;font-size:17px;font-weight:700;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#f1e9e1;color:#5d4a3b}
+  .badge.assigned{background:#fdebd8;color:#9a5b12}
+  .badge.picked_up{background:#e8e3fb;color:#5a3ca8}
+  .badge.arrived{background:#e3effd;color:#1f5f9a}
+  .badge.delivered{background:#dff3e6;color:#1f7a3f}
+  .badge.issue{background:#fbe3e1;color:#a52a1f}
+  .badge.cancelled{background:#fbe3e1;color:#a52a1f}
+  .notice{border-radius:12px;padding:14px 16px;font-size:14px;margin:14px 0}
+  .notice.info{background:#eef5fd;border:1px solid #cfe1f6;color:#1f4f7a}
+  .notice.ok{background:#e8f7ee;border:1px solid #c4e7d2;color:#176b3b}
+  .notice.bad{background:#fdeeed;border:1px solid #f3cdc9;color:#8f2c22}
+  .notice.warn{background:#fff8e8;border:1px solid #f0dfb2;color:#6b5414}
+  .error{color:var(--bad);font-size:14px;min-height:1.2em}
+  .hidden{display:none!important}
+  .items-name{font-weight:600}
+  .center{text-align:center}
+  .steps{display:flex;gap:8px;justify-content:space-between;margin:14px 0 4px;font-size:11px;color:var(--mut)}
+  .steps span{flex:1;text-align:center;padding-top:8px;border-top:3px solid var(--line)}
+  .steps span.on{border-top-color:var(--or);color:var(--ink);font-weight:700}
+  .big-icon{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:26px;margin:0 auto 10px}
+  .big-icon.ok{background:#e8f7ee;color:var(--ok)}
+  .big-icon.bad{background:#fdeeed;color:var(--bad)}
+  .big-icon.info{background:#eef5fd;color:#1f4f7a}
+  footer{text-align:center;font-size:12px;color:var(--mut);margin:20px 0 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <strong>TasteHub Kenya</strong>
+  <small>Secure delivery confirmation</small>
+</header>
+
+<main class="wrap">
+  <section class="card" id="loading">
+    <p class="muted">Loading your delivery…</p>
+  </section>
+
+  <section class="card hidden" id="fatal">
+    <div class="big-icon bad">!</div>
+    <h1 class="center">We could not open this link</h1>
+    <p class="error center" id="fatalMsg" role="alert"></p>
+    <p class="muted center">Please check the link in your email, or contact your TasteHub branch for help.</p>
+  </section>
+
+  <section class="card hidden" id="content">
+    <div id="statusPanel"></div>
+    <div id="summary"></div>
+    <div id="actions"></div>
+    <div id="reportPanel" class="hidden">
+      <h2>Report a problem</h2>
+      <p class="muted">Tell us what is wrong and headquarters will follow up. Your message goes straight to the HQ inbox and your branch.</p>
+      <form id="reportForm">
+        <label for="issueType">What went wrong? (required)</label>
+        <select id="issueType" required>
+          <option value="wrong_delivery">Wrong delivery</option>
+          <option value="breakage">Breakage or damage</option>
+          <option value="missing_item">Missing item</option>
+          <option value="late">Late delivery</option>
+          <option value="other">Other problem</option>
+        </select>
+        <label for="issueMessage">Tell us more (required)</label>
+        <textarea id="issueMessage" maxlength="1000" minlength="5" required placeholder="Describe the problem, for example which item is missing or damaged."></textarea>
+        <p class="error" id="reportMsg" role="alert"></p>
+        <div class="row" style="margin-top:12px">
+          <button class="btn danger" type="submit" id="reportBtn">Send report</button>
+          <button class="btn secondary" type="button" id="cancelReport">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <footer>TasteHub Kenya · Your branch will contact you if you report a problem.</footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const token = new URLSearchParams(location.search).get('token') || '';
+let delivery = null;
+let busy = false;
+
+function esc(value){
+  return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function money(value){ return 'KSh ' + Number(value || 0).toLocaleString('en-KE'); }
+function when(value){
+  if (!value) return 'To be confirmed';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'To be confirmed';
+  return date.toLocaleString('en-KE', {dateStyle:'medium', timeStyle:'short'});
+}
+function label(status){ return String(status || '').replace(/_/g, ' '); }
+
+async function api(path, options = {}){
+  const headers = {'Content-Type':'application/json', ...(options.headers || {})};
+  const response = await fetch(path, {...options, headers});
+  let data = null;
+  try { data = await response.json(); } catch (e) { /* empty body */ }
+  if (!response.ok) throw new Error((data && data.error) || ('Request failed (' + response.status + ')'));
+  return data;
+}
+
+function summarise(){
+  const items = (delivery.items || []).map((item) =>
+    '<tr><td><span class="items-name">' + esc(item.name) + '</span><br><small class="muted">' + esc(item.category || '') + '</small></td><td>' + item.quantity + '</td><td>' + money(item.lineTotalKes) + '</td></tr>'
+  ).join('');
+  return '<p><span class="badge ' + esc(delivery.status) + '">' + esc(label(delivery.status)) + '</span></p>' +
+    '<p><b>Order #' + delivery.orderId + '</b> · ' + esc(delivery.branch) + '</p>' +
+    '<p class="muted">Hello ' + esc(delivery.customerName) + '.' + (delivery.driver ? ' Your driver is ' + esc(delivery.driver.name) + '.' : '') + '</p>' +
+    '<table><thead><tr><th>Item</th><th>Qty</th><th>Line</th></tr></thead><tbody>' + items + '</tbody></table>' +
+    '<div class="total"><span>Total</span><span>' + money(delivery.totalKes) + '</span></div>' +
+    (delivery.deliveryAddress ? '<p style="margin-top:14px"><b>Deliver to:</b><br>' + esc(delivery.deliveryAddress) + '</p>' : '') +
+    nextDates();
+}
+
+function nextDates(){
+  if (!delivery.nextReadyAt && !delivery.nextDeliveryAt) return '';
+  return '<div class="notice info"><b>Your next delivery</b><br>' +
+    'Ready: ' + esc(when(delivery.nextReadyAt)) + '<br>' +
+    'Delivery: ' + esc(when(delivery.nextDeliveryAt)) +
+  '</div>';
+}
+
+function steps(status){
+  const order = ['picked_up','arrived','delivered'];
+  const done = status === 'delivered' ? 2 : status === 'issue' ? 1 : order.indexOf(status);
+  return '<div class="steps">' +
+    '<span class="' + (done >= 0 ? 'on' : '') + '">On the way</span>' +
+    '<span class="' + (done >= 1 ? 'on' : '') + '">Arrived</span>' +
+    '<span class="' + (done >= 2 ? 'on' : '') + '">Confirmed</span>' +
+  '</div>';
+}
+
+function render(){
+  $('loading').classList.add('hidden');
+  $('content').classList.remove('hidden');
+  $('reportPanel').classList.add('hidden');
+  $('summary').innerHTML = summarise();
+  const status = delivery.status;
+  let panel = '';
+  let actions = '';
+
+  if (status === 'delivered'){
+    panel = '<div class="big-icon ok">✓</div><h1 class="center">Delivery confirmed</h1>' +
+      '<div class="notice ok center">Thank you, ' + esc(delivery.customerName) + '. Order #' + delivery.orderId + ' was confirmed delivered' +
+      (delivery.confirmedAt ? ' on ' + esc(when(delivery.confirmedAt)) : '') + '.</div>';
+    actions = '<p class="muted center">A confirmation email has been sent. Keep this page for your records.</p>';
+  } else if (status === 'issue'){
+    panel = '<div class="big-icon bad">!</div><h1 class="center">Problem reported</h1>' +
+      '<div class="notice bad"><b>' + esc(delivery.issue ? delivery.issue.label : 'Delivery problem') + '</b><br>' +
+      esc(delivery.issue ? delivery.issue.note : '') +
+      '<br><small>Reported ' + esc(when(delivery.issue && delivery.issue.reportedAt)) + '. Headquarters and your branch have been notified and will contact you.</small></div>';
+    actions = '<p class="muted center">If the situation changes, please contact your branch directly.</p>';
+  } else if (status === 'arrived'){
+    panel = '<div class="big-icon info">📍</div><h1 class="center">Your driver has arrived</h1>' +
+      '<div class="notice info center">Please check your items. Confirm only when everything is correct, or report a problem below.</div>';
+    actions = '<div class="row" style="margin-top:6px">' +
+      '<button class="btn block" id="confirmBtn" style="flex:1">Confirm delivery</button>' +
+      '<button class="btn secondary block" id="showReport" style="flex:1">Report a problem</button>' +
+      '</div>' +
+      '<p class="error center" id="actionMsg" role="alert"></p>';
+  } else if (status === 'cancelled'){
+    panel = '<div class="big-icon bad">!</div><h1 class="center">Delivery cancelled</h1>' +
+      '<div class="notice bad">This delivery was cancelled. Please contact your branch if you were expecting an order.</div>';
+    actions = '';
+  } else {
+    panel = '<div class="big-icon info">🚚</div><h1 class="center">Your delivery is on the way</h1>' +
+      '<div class="notice warn">This page becomes active when the driver marks your delivery as arrived. You will also receive an email with this link at that time.</div>';
+    actions = '<p class="muted center">Keep this link. Refresh the page when your driver arrives.</p>';
+  }
+
+  $('statusPanel').innerHTML = steps(status) + panel;
+  $('actions').innerHTML = actions;
+  const confirmBtn = $('confirmBtn');
+  if (confirmBtn) confirmBtn.onclick = confirmDelivery;
+  const showReport = $('showReport');
+  if (showReport) showReport.onclick = () => {
+    $('reportPanel').classList.remove('hidden');
+    $('issueMessage').focus();
+  };
+}
+
+async function confirmDelivery(){
+  if (busy || !delivery) return;
+  const button = $('confirmBtn');
+  const message = $('actionMsg');
+  if (!window.confirm('Confirm that you received order #' + delivery.orderId + ' in good condition?')) return;
+  busy = true;
+  if (button) button.disabled = true;
+  if (message) message.textContent = '';
+  try {
+    const result = await api('/api/delivery/' + encodeURIComponent(token) + '/confirm', {method:'POST'});
+    delivery = result.delivery;
+    render();
+    $('statusPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  } catch (error) {
+    if (message) message.textContent = error.message;
+  } finally {
+    busy = false;
+    if (button) button.disabled = false;
+  }
+}
+
+async function sendReport(event){
+  event.preventDefault();
+  if (busy || !delivery) return;
+  busy = true;
+  const button = $('reportBtn');
+  const message = $('reportMsg');
+  button.disabled = true;
+  message.textContent = '';
+  try {
+    const result = await api('/api/delivery/' + encodeURIComponent(token) + '/report', {method:'POST', body: JSON.stringify({
+      issueType: $('issueType').value,
+      message: $('issueMessage').value.trim(),
+    })});
+    delivery = result.delivery;
+    $('reportPanel').classList.add('hidden');
+    render();
+    $('statusPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    busy = false;
+    button.disabled = false;
+  }
+}
+
+$('reportForm').addEventListener('submit', sendReport);
+$('cancelReport').onclick = () => $('reportPanel').classList.add('hidden');
+
+async function load(){
+  if (!token){
+    $('loading').classList.add('hidden');
+    $('fatal').classList.remove('hidden');
+    $('fatalMsg').textContent = 'The confirmation link is missing its secure token.';
+    return;
+  }
+  try {
+    const result = await api('/api/delivery/' + encodeURIComponent(token));
+    delivery = result.delivery;
+    render();
+  } catch (error) {
+    $('loading').classList.add('hidden');
+    $('fatal').classList.remove('hidden');
+    $('fatalMsg').textContent = error.message;
+  }
+}
+
+load();
+</script>
+</body>
+</html>

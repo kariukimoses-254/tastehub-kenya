@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteHub | Branch Dashboard</title>
+<style>
+  :root{--ink:#21170f;--or:#ed7c2d;--or2:#d9691b;--bg:#f7f3ef;--card:#fff;--line:#e9ddd2;--mut:#766b62;--ok:#1f8a4c;--warn:#b9770e;--bad:#c0392b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,Arial,sans-serif}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer;border:0}
+  a{color:var(--or)}
+  .top{background:var(--ink);color:#fff;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .top strong{font-size:18px}
+  .top .who{display:flex;align-items:center;gap:14px;font-size:13px;flex-wrap:wrap}
+  .top .who span{opacity:.78}
+  .link{background:none;color:#fff;text-decoration:underline;padding:0}
+  .wrap{max-width:1180px;margin:26px auto 60px;padding:0 18px}
+  .card{background:var(--card);padding:22px;border-radius:14px;margin:16px 0;box-shadow:0 5px 24px #24170e0c;border:1px solid #00000008}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px}
+  .stat{padding:18px;border-radius:13px;background:#fff;border:1px solid var(--line)}
+  .stat b{display:block;font-size:28px;line-height:1.1;margin-bottom:4px}
+  .stat small{color:var(--mut)}
+  .muted{color:var(--mut)}
+  .small{font-size:13px}
+  h1,h2,h3{margin:0 0 10px}
+  h1{font-size:26px}h2{font-size:21px}h3{font-size:17px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input,select,textarea{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);min-width:0}
+  input[type=number]{width:110px}
+  .btn{background:var(--or);color:#fff;padding:10px 18px;border-radius:9px;font-weight:600}
+  .btn:hover{background:var(--or2)}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:6px 12px;font-size:13px;border-radius:7px}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
+  .tab{background:#fff;border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:999px;font-weight:600}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar label{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  .branchhead{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:0}
+  .branchhead h1{margin-bottom:4px}
+  .branchhead .facts{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:14px}
+  .branchhead .facts span{background:#f7f3ef;border-radius:999px;padding:5px 11px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#f1e9e1;color:#5d4a3b;white-space:nowrap}
+  .badge.received{background:#fdebd8;color:#9a5b12}
+  .badge.confirmed{background:#e3effd;color:#1f5f9a}
+  .badge.preparing{background:#fff2cc;color:#8a6500}
+  .badge.ready{background:#e7f5ea;color:#1f7a3f}
+  .badge.out_for_delivery{background:#e8e3fb;color:#5a3ca8}
+  .badge.assigned{background:#fdebd8;color:#9a5b12}
+  .badge.picked_up{background:#e8e3fb;color:#5a3ca8}
+  .badge.arrived{background:#e3effd;color:#1f5f9a}
+  .badge.delivered{background:#dff3e6;color:#1f7a3f}
+  .badge.issue{background:#fbe3e1;color:#a52a1f}
+  .badge.completed{background:#dff3e6;color:#1f7a3f}
+  .badge.cancelled{background:#fbe3e1;color:#a52a1f}
+  .badge.urgent{background:#fbe3e1;color:#a52a1f}
+  .badge.high{background:#fdebd8;color:#9a5b12}
+  .badge.normal{background:#eef0f2;color:#4d5660}
+  .badge.low{background:#eef0f2;color:#6a747d}
+  .msg{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:#fff}
+  .msg header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .msg p{margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+  .notice{background:#fff8e8;border:1px solid #f0dfb2;color:#6b5414;border-radius:10px;padding:11px 14px;font-size:13px;margin:12px 0}
+  .empty{padding:26px;text-align:center;color:var(--mut)}
+  .error{color:var(--bad);font-size:14px;min-height:1.2em}
+  .modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;padding:18px;z-index:50}
+  .modal.open{display:grid}
+  .modal .box{background:#fff;border-radius:14px;padding:22px;width:min(680px,100%);max-height:88vh;overflow:auto}
+  .modal .box header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  .close{background:none;color:var(--ink);font-size:20px;padding:0 4px}
+  .reply{width:100%;min-height:80px;margin-top:8px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,70px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:60;transition:transform .25s;max-width:90vw}
+  .toast.show{transform:translate(-50%,0)}
+  .hidden{display:none!important}
+  .detailactions{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .detailactions label{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:5px}
+  .detailactions input{min-width:220px}
+  @media(max-width:680px){.top{padding:16px 18px}.wrap{padding:0 12px}.card{padding:16px}table{font-size:13px}th,td{padding:8px 5px}.detailactions input{min-width:0;width:100%}}
+</style>
+</head>
+<body>
+<header class="top">
+  <strong id="brandTitle">TasteHub · Branch</strong>
+  <div class="who hidden" id="who">
+    <span id="whoEmail"></span>
+    <a class="link hidden" id="hqLink" href="/admin.html">HQ dashboard</a>
+    <button class="link" id="signOut">Sign out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="login">
+    <h1>Branch sign in</h1>
+    <p class="muted">Use the branch manager account issued by headquarters.</p>
+    <form id="loginForm" class="row" style="align-items:stretch">
+      <input id="email" type="email" placeholder="Branch email" autocomplete="username" required style="flex:1;min-width:220px">
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" required style="flex:1;min-width:220px">
+      <button class="btn" type="submit" id="signInBtn">Sign in</button>
+    </form>
+    <p class="error" id="loginMsg" role="alert"></p>
+    <p class="muted small">Headquarters staff? <a href="/admin.html">Open the HQ dashboard</a>.</p>
+  </section>
+
+  <section id="dash" class="hidden">
+    <div class="branchhead" id="branchHead"></div>
+    <div class="grid" id="stats"></div>
+
+    <nav class="tabs" aria-label="Branch sections">
+      <button class="tab on" data-tab="orders">Orders</button>
+      <button class="tab" data-tab="messages">Messages</button>
+      <button class="tab" data-tab="notifications">Notifications</button>
+    </nav>
+
+    <section class="card" id="panel-orders">
+      <div class="row" style="justify-content:space-between">
+        <h2>Branch orders</h2>
+        <button class="btn secondary small" data-refresh="orders">Refresh</button>
+      </div>
+      <div class="toolbar">
+        <label>Status <select id="orderStatus"><option value="">All statuses</option></select></label>
+      </div>
+      <div id="orders"><p class="empty">Loading orders…</p></div>
+    </section>
+
+    <section class="card hidden" id="panel-messages">
+      <div class="row" style="justify-content:space-between">
+        <h2>Branch messages</h2>
+        <button class="btn secondary small" data-refresh="messages">Refresh</button>
+      </div>
+      <p class="muted">Messages sent from or addressed to your branch. Replies are handled by headquarters.</p>
+      <div id="messages"><p class="empty">Loading messages…</p></div>
+    </section>
+
+    <section class="card hidden" id="panel-notifications">
+      <div class="row" style="justify-content:space-between">
+        <h2>Unread notifications</h2>
+        <button class="btn secondary small" data-refresh="notifications">Refresh</button>
+      </div>
+      <div id="notifications"><p class="empty">Loading notifications…</p></div>
+    </section>
+  </section>
+</main>
+
+<div class="modal" id="detailModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <header><h2 id="detailTitle">Order details</h2><button class="close" data-close-modal aria-label="Close">✕</button></header>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const STATUSES = ['received','confirmed','preparing','ready','out_for_delivery','completed','cancelled'];
+const ROLE_LABELS = {central_admin:'Central admin', branch_manager:'Branch manager', staff:'Staff'};
+const $ = (id) => document.getElementById(id);
+let token = sessionStorage.getItem('tastehubBranchToken') || '';
+let user = null;
+let branch = null;
+let orders = [];
+let notifications = [];
+let currentTab = 'orders';
+
+function esc(value){
+  return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function money(value){ return Number(value || 0).toLocaleString('en-KE'); }
+function when(value){ return value ? new Date(value).toLocaleString() : '—'; }
+function label(value){ return String(value || '').replace(/_/g, ' '); }
+
+let toastTimer;
+function toast(message){
+  const node = $('toast');
+  node.textContent = message;
+  node.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => node.classList.remove('show'), 2800);
+}
+
+async function api(path, options = {}){
+  const headers = {'Content-Type':'application/json', ...(options.headers || {})};
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const response = await fetch(path, {...options, headers});
+  let data = null;
+  try { data = await response.json(); } catch (e) { /* empty body */ }
+  if (!response.ok){
+    if (response.status === 401) signOut(false);
+    throw new Error((data && data.error) || ('Request failed (' + response.status + ')'));
+  }
+  return data;
+}
+
+function signOut(showMessage = true){
+  token = '';
+  sessionStorage.removeItem('tastehubBranchToken');
+  $('who').classList.add('hidden');
+  $('dash').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginMsg').textContent = showMessage ? 'You have signed out.' : '';
+  $('brandTitle').textContent = 'TasteHub · Branch';
+}
+
+function branchScopeQuery(){
+  return user && user.role === 'central_admin' && user.branch
+    ? '?branch=' + encodeURIComponent(user.branch)
+    : '';
+}
+
+async function showDashboard(nextUser){
+  user = nextUser;
+  $('login').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  $('who').classList.remove('hidden');
+  $('whoEmail').textContent = user.email + ' · ' + (ROLE_LABELS[user.role] || user.role);
+  $('hqLink').classList.toggle('hidden', user.role !== 'central_admin');
+  $('brandTitle').textContent = user.role === 'central_admin'
+    ? 'TasteHub · Branch view'
+    : 'TasteHub · ' + (user.branch || 'Branch');
+
+  try {
+    const branches = await api('/api/branches');
+    branch = branches.find((entry) => entry.name === user.branch) || null;
+  } catch (error) {
+    branch = null;
+  }
+  renderBranchHead();
+  await Promise.all([loadOrders(), loadMessages(), loadNotifications()]);
+}
+
+function renderBranchHead(){
+  if (!branch){
+    $('branchHead').innerHTML =
+      '<h1>All branches</h1><p class="muted">No branch is assigned to this account. Ask headquarters to assign one.</p>';
+    return;
+  }
+  $('branchHead').innerHTML =
+    '<h1>' + esc(branch.displayName) + (branch.isHeadquarters ? ' · HQ' : '') + '</h1>' +
+    '<p class="muted">' + esc(branch.address || 'Address not configured') + ' · ' + esc(branch.phone || 'Phone not configured') + '</p>' +
+    '<div class="facts">' +
+      '<span>Delivery KSh ' + money(branch.deliveryFeeKes) + '</span>' +
+      '<span>Free over KSh ' + money(branch.freeDeliveryThresholdKes) + '</span>' +
+      '<span>Minimum KSh ' + money(branch.minOrderKes) + '</span>' +
+      '<span class="badge ' + (branch.acceptingOrders ? 'completed' : 'cancelled') + '">' +
+        (branch.acceptingOrders ? 'Accepting orders' : 'Not accepting orders') +
+      '</span>' +
+    '</div>';
+}
+
+function renderStats(){
+  const activeStatuses = ['received','confirmed','preparing','ready','out_for_delivery'];
+  const today = new Date().toDateString();
+  const count = (predicate) => orders.filter(predicate).length;
+  const completedToday = (order) => {
+    if (order.status !== 'completed') return false;
+    const stamp = order.updatedAt || order.createdAt;
+    return Boolean(stamp) && new Date(stamp).toDateString() === today;
+  };
+  const cards = [
+    ['New orders', count((order) => order.status === 'received')],
+    ['In progress', count((order) => ['confirmed','preparing'].includes(order.status))],
+    ['Ready', count((order) => order.status === 'ready')],
+    ['Out for delivery', count((order) => order.status === 'out_for_delivery')],
+    ['Completed today', count(completedToday)],
+    ['Active total', count((order) => activeStatuses.includes(order.status))],
+    ['Unread notifications', notifications.length],
+  ];
+  $('stats').innerHTML = cards.map(([labelText, value]) =>
+    '<div class="stat"><b>' + esc(value) + '</b><small>' + esc(labelText) + '</small></div>'
+  ).join('');
+}
+
+async function loadOrders(){
+  const container = $('orders');
+  container.innerHTML = '<p class="empty">Loading orders…</p>';
+  try {
+    const params = new URLSearchParams();
+    if ($('orderStatus').value) params.set('status', $('orderStatus').value);
+    if (user.role === 'central_admin' && user.branch) params.set('branch', user.branch);
+    const suffix = params.toString() ? '?' + params.toString() : '';
+    const rows = await api('/api/branch/orders' + suffix);
+    orders = rows;
+    renderStats();
+    if (!rows.length){ container.innerHTML = '<p class="empty">No orders match this filter.</p>'; return; }
+    const showBranch = user.role === 'central_admin';
+    container.innerHTML =
+      '<div style="overflow:auto"><table><thead><tr>' +
+        '<th>Order</th>' + (showBranch ? '<th>Branch</th>' : '') +
+        '<th>Customer</th><th>Total</th><th>Fulfilment</th><th>Status</th><th>Placed</th><th>Next step</th>' +
+      '</tr></thead><tbody>' +
+      rows.map((order) => {
+        const next = Array.isArray(order.nextStatuses) ? order.nextStatuses : [];
+        const action = next.length
+          ? '<div class="row"><select data-status-for="' + order.id + '" aria-label="Next status for order ' + order.id + '">' +
+              next.map((status) => '<option value="' + esc(status) + '">' + esc(label(status)) + '</option>').join('') +
+            '</select><button class="btn small" data-order-save="' + order.id + '">Update</button></div>'
+          : '<span class="muted small">No further steps</span>';
+        return '<tr>' +
+          '<td><button class="link" style="color:var(--or);text-decoration:underline" data-order-view="' + order.id + '">#' + order.id + '</button></td>' +
+          (showBranch ? '<td>' + esc(order.branch) + '</td>' : '') +
+          '<td>' + esc(order.customer.name) + '<br><small class="muted">' + esc(order.customer.phone) + '</small></td>' +
+          '<td>KSh ' + money(order.totalKes) + '</td>' +
+          '<td>' + esc(label(order.deliveryType)) + '</td>' +
+          '<td><span class="badge ' + esc(order.status) + '">' + esc(label(order.status)) + '</span></td>' +
+          '<td><small>' + esc(when(order.createdAt)) + '</small></td>' +
+          '<td>' + action + '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div>';
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function updateOrderStatus(id, status, note, keepModal){
+  try {
+    await api('/api/branch/orders/' + id + '/status', {
+      method:'PATCH',
+      body: JSON.stringify({status, note: note || undefined}),
+    });
+    toast('Order #' + id + ' updated to ' + label(status));
+    await Promise.all([loadOrders(), loadNotifications()]);
+    if (keepModal) await openOrder(id);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function openOrder(id){
+  try {
+    const order = await api('/api/branch/orders/' + id);
+    const items = order.items.map((item) =>
+      '<tr><td>' + esc(item.name) + '</td><td>' + item.quantity + '</td><td>KSh ' + money(item.unitPriceKes) + '</td><td>KSh ' + money(item.lineTotalKes) + '</td></tr>'
+    ).join('');
+    const history = order.history.map((entry) =>
+      '<li>' + esc(label(entry.to)) + ' <small class="muted">' + esc(when(entry.createdAt)) +
+        (entry.changedBy ? ' · ' + esc(entry.changedBy) : '') +
+        (entry.note ? ' · ' + esc(entry.note) : '') + '</small></li>'
+    ).join('');
+    const next = Array.isArray(order.nextStatuses) ? order.nextStatuses : [];
+    const actions = next.length
+      ? '<div class="detailactions">' +
+          '<label>Next status<select data-detail-status="' + order.id + '">' +
+            next.map((status) => '<option value="' + esc(status) + '">' + esc(label(status)) + '</option>').join('') +
+          '</select></label>' +
+          '<label>Note (optional)<input data-detail-note="' + order.id + '" maxlength="255" placeholder="e.g. Customer confirmed"></label>' +
+          '<button class="btn" data-detail-save="' + order.id + '">Update status</button>' +
+        '</div>'
+      : '<p class="muted" style="margin-top:14px">This order is ' + esc(label(order.status)) + ' and cannot move further.</p>';
+
+    $('detailTitle').textContent = 'Order #' + order.id;
+    $('detailBody').innerHTML =
+      '<p><span class="badge ' + esc(order.status) + '">' + esc(label(order.status)) + '</span> · ' + esc(order.branch) + ' · ' + esc(label(order.deliveryType)) + '</p>' +
+      '<p><b>' + esc(order.customer.name) + '</b><br>' + esc(order.customer.phone) + (order.customer.email ? '<br>' + esc(order.customer.email) : '') + '</p>' +
+      (order.deliveryAddress ? '<p><b>Deliver to:</b> ' + esc(order.deliveryAddress) + '</p>' : '') +
+      (order.delivery
+        ? '<p><b>Driver:</b> ' + esc(order.delivery.driver.name) + ' · <span class="badge ' + esc(order.delivery.status) + '">' + esc(label(order.delivery.status)) + '</span>' +
+          (order.delivery.issue ? '<br><span class="badge issue">' + esc(order.delivery.issue.label) + '</span> ' + esc(order.delivery.issue.note || '') : '') + '</p>'
+        : (order.deliveryType === 'delivery' ? '<p class="muted">No driver assigned by headquarters yet.</p>' : '')) +
+      '<table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line</th></tr></thead><tbody>' + items + '</tbody></table>' +
+      '<p style="margin-top:12px">Subtotal KSh ' + money(order.subtotalKes) + ' · Discount KSh ' + money(order.discountKes) + ' · Delivery KSh ' + money(order.deliveryFeeKes) + ' · <b>Total KSh ' + money(order.totalKes) + '</b></p>' +
+      (order.notes ? '<p><b>Notes:</b> ' + esc(order.notes) + '</p>' : '') +
+      '<h3 style="margin-top:16px">Status history</h3><ul>' + history + '</ul>' +
+      actions;
+    $('detailModal').classList.add('open');
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function loadMessages(){
+  const container = $('messages');
+  container.innerHTML = '<p class="empty">Loading messages…</p>';
+  try {
+    const rows = await api('/api/branch/messages' + branchScopeQuery());
+    if (!rows.length){ container.innerHTML = '<p class="empty">No messages for this branch yet.</p>'; return; }
+    container.innerHTML = rows.map((message) =>
+      '<article class="msg">' +
+        '<header><div><b>' + esc(message.subject || 'Branch message') + '</b>' +
+          '<div class="muted">' + esc(message.fromBranch) + ' → ' + esc(message.toBranch || 'Headquarters') +
+          ' · ' + esc(message.senderName || 'Unknown sender') +
+          (message.senderEmail ? ' · ' + esc(message.senderEmail) : '') + '</div></div>' +
+          '<div><span class="badge ' + esc(message.priority) + '">' + esc(message.priority) + '</span> ' +
+          '<span class="badge ' + esc(message.status) + '">' + esc(label(message.status)) + '</span></div></header>' +
+        '<p>' + esc(message.message) + '</p>' +
+        '<small class="muted">' + esc(when(message.createdAt)) + '</small>' +
+      '</article>'
+    ).join('');
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+async function loadNotifications(){
+  const container = $('notifications');
+  container.innerHTML = '<p class="empty">Loading notifications…</p>';
+  try {
+    notifications = await api('/api/branch/notifications' + branchScopeQuery());
+    renderStats();
+    if (!notifications.length){ container.innerHTML = '<p class="empty">No unread notifications.</p>'; return; }
+    container.innerHTML = notifications.map((entry) =>
+      '<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:10px 0">' +
+        '<span><span class="badge received">' + esc(label(entry.event_type)) + '</span> ' + esc(entry.message) + '</span>' +
+        '<small class="muted">' + esc(when(entry.created_at)) + '</small>' +
+      '</div>'
+    ).join('');
+  } catch (error) {
+    container.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+  }
+}
+
+// ---------------------------------------------------------------- events
+$('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  $('loginMsg').textContent = '';
+  $('signInBtn').disabled = true;
+  try {
+    const result = await api('/api/auth/login', {
+      method:'POST',
+      body: JSON.stringify({email:$('email').value, password:$('password').value}),
+    });
+    if (result.user.role !== 'branch_manager' && result.user.role !== 'central_admin'){
+      throw new Error('This page is for branch managers and central administrators');
+    }
+    token = result.token;
+    sessionStorage.setItem('tastehubBranchToken', token);
+    $('password').value = '';
+    await showDashboard(result.user);
+  } catch (error) {
+    $('loginMsg').textContent = error.message;
+  } finally {
+    $('signInBtn').disabled = false;
+  }
+});
+
+$('signOut').onclick = () => signOut();
+
+document.querySelectorAll('[data-tab]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    currentTab = button.dataset.tab;
+    document.querySelectorAll('[data-tab]').forEach((tab) => tab.classList.toggle('on', tab === button));
+    ['orders','messages','notifications'].forEach((name) => $('panel-' + name).classList.toggle('hidden', name !== currentTab));
+    if (currentTab === 'orders') await loadOrders();
+    if (currentTab === 'messages') await loadMessages();
+    if (currentTab === 'notifications') await loadNotifications();
+  });
+});
+
+document.querySelectorAll('[data-refresh]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    if (button.dataset.refresh === 'orders') await Promise.all([loadOrders(), loadNotifications()]);
+    if (button.dataset.refresh === 'messages') await loadMessages();
+    if (button.dataset.refresh === 'notifications') await loadNotifications();
+  });
+});
+
+$('orderStatus').onchange = loadOrders;
+
+document.addEventListener('click', (event) => {
+  const view = event.target.closest('[data-order-view]');
+  if (view) return openOrder(view.dataset.orderView);
+
+  const save = event.target.closest('[data-order-save]');
+  if (save){
+    const id = save.dataset.orderSave;
+    const select = document.querySelector('[data-status-for="' + id + '"]');
+    if (select) return updateOrderStatus(id, select.value, '', false);
+  }
+
+  const detailSave = event.target.closest('[data-detail-save]');
+  if (detailSave){
+    const id = detailSave.dataset.detailSave;
+    const select = document.querySelector('[data-detail-status="' + id + '"]');
+    const note = document.querySelector('[data-detail-note="' + id + '"]');
+    if (select) return updateOrderStatus(id, select.value, note ? note.value.trim() : '', true);
+  }
+
+  if (event.target.closest('[data-close-modal]')) $('detailModal').classList.remove('open');
+  if (event.target.id === 'detailModal') $('detailModal').classList.remove('open');
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') $('detailModal').classList.remove('open');
+});
+
+$('orderStatus').innerHTML += STATUSES.map((status) =>
+  '<option value="' + status + '">' + label(status) + '</option>'
+).join('');
+
+// Restore a session when the page reloads.
+if (token){
+  api('/api/auth/me')
+    .then((result) => {
+      if (result.user.role !== 'branch_manager' && result.user.role !== 'central_admin'){
+        throw new Error('Not a branch account');
+      }
+      return showDashboard(result.user);
+    })
+    .catch(() => signOut(false));
+}
+</script>
+</body>
+</html>
