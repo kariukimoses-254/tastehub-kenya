@@ -46,12 +46,11 @@
     <nav aria-label="Footer navigation">
       <a href="/">Home</a><a href="/menu.html">Menu</a><a href="/about.html">About</a>
       <a href="/blog.html">Blog</a><a href="/contact.html">Contact</a>
-      <a href="/admin.html">HQ</a><a href="/branch.html">Branch</a>
-      <a href="/driver.html">Driver</a><a href="/confirm.html">Confirm</a>
     </nav>
   </div>
 </footer>
 
+<script src="/dish-images.js"></script>
 <script src="/nav.js"></script>
 <script>
 (function () {
@@ -109,7 +108,7 @@
     });
     $('meals').innerHTML = list.length ? list.map(function (m) {
       return '<article class="card meal">' +
-        '<div class="pic"><img alt="' + esc(m.name) + '" src="' + esc(m.imageUrl || FALLBACK) + '" loading="lazy"></div>' +
+        '<div class="pic"><img alt="' + esc(m.name) + '" src="' + esc((window.DISH_IMAGES || {})[m.name] || m.imageUrl || FALLBACK) + '"></div>' +
         '<div class="body">' +
           '<span class="tag">' + esc(m.category || 'Dish') + '</span>' +
           '<h3>' + esc(m.name) + '</h3>' +

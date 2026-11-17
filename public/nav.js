@@ -10,13 +10,6 @@
     { label: 'Contact', href: '/contact.html' }
   ];
 
-  var staff = [
-    { label: 'HQ Admin', href: '/admin.html' },
-    { label: 'Branch', href: '/branch.html' },
-    { label: 'Driver', href: '/driver.html' },
-    { label: 'Confirm', href: '/confirm.html' }
-  ];
-
   var path = (location.pathname || '/').replace(/index\.html$/, '/');
 
   function isActive(href) {
@@ -40,7 +33,6 @@
     '<div class="inner">' +
       '<a class="brand" href="/">Taste<b>Hub</b> <span>Kenya</span></a>' +
       '<div class="group">' + render(customer) + '</div>' +
-      '<div class="group staff"><span class="label">Staff</span>' + render(staff) + '</div>' +
     '</div>';
 
   var css = document.createElement('link');

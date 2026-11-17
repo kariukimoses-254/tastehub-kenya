@@ -421,7 +421,7 @@ function loadMenu(branch){
   if(appliedPromo)appliedPromo=findPromo(appliedPromo.code);
   dishes=(data.meals||[]).filter(function(m){return m.available!==false}).map(function(m){
    var meta=metaByName[m.name]||{};
-   return [m.name,m.description||'',imageByName[m.name]||FALLBACK_IMG,meta.rating||'4.8',meta.reviews||'100+',m.priceKes,meta.color||'#5d3a16',m.category||'Other'];
+   return [m.name,m.description||'',(window.DISH_IMAGES||{})[m.name]||imageByName[m.name]||m.imageUrl||FALLBACK_IMG,meta.rating||'4.8',meta.reviews||'100+',m.priceKes,meta.color||'#5d3a16',m.category||'Other'];
   });
   cats=(data.categories&&data.categories.length?data.categories:['All']).map(function(c){return c==='All'?['All','grid']:[c,catIcons[c]!==undefined?catIcons[c]:'grid']});
   q='';cur='All';rot=0;catUI('All');dishUI('All');
@@ -580,6 +580,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll()})
 // Navigation now uses real pages; no placeholder click handler is needed.
 $('copy').onclick=function(){try{navigator.clipboard.writeText('TASTE30').then(function(){toast('Code TASTE30 copied')},function(){toast('Code: TASTE30')})}catch(e){toast('Code: TASTE30')}};
 </script>
+<script src="/dish-images.js"></script>
 <script src="/nav.js"></script>
 </body>
 </html>

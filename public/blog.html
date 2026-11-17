@@ -39,8 +39,6 @@
     <nav aria-label="Footer navigation">
       <a href="/">Home</a><a href="/menu.html">Menu</a><a href="/about.html">About</a>
       <a href="/blog.html">Blog</a><a href="/contact.html">Contact</a>
-      <a href="/admin.html">HQ</a><a href="/branch.html">Branch</a>
-      <a href="/driver.html">Driver</a><a href="/confirm.html">Confirm</a>
     </nav>
   </div>
 </footer>
@@ -99,6 +97,13 @@
     }
   ];
 
+  var thumbs = {
+    'How to build the perfect Friday lunch order': '/images/chicken-biryani.jpg',
+    'Behind the pass: what "fresh daily" really means': '/images/paneer-butter-masala.jpg',
+    'Five branch favourites to try this month': '/images/margherita-pizza.jpg',
+    'A smarter way to order for the whole office': '/images/crispy-chicken-burger.jpg'
+  };
+
   var state = { category: 'All' };
   var categories = ['All'].concat(posts.map(function (p) { return p.cat; }).filter(function (c, i, a) {
     return a.indexOf(c) === i;
@@ -111,6 +116,7 @@
     document.getElementById('count').textContent = list.length + ' article' + (list.length === 1 ? '' : 's');
     document.getElementById('posts').innerHTML = list.map(function (p, index) {
       return '<article class="card post" data-post="' + index + '">' +
+        '<img class="thumb" src="' + esc(thumbs[p.title] || '/images/chicken-biryani.jpg') + '" alt="' + esc(p.title) + '">' +
         '<div class="meta"><span class="tag">' + esc(p.cat) + '</span><span>' + esc(p.date) + '</span><span>&middot;</span><span>' + esc(p.read) + '</span></div>' +
         '<h2>' + esc(p.title) + '</h2>' +
         '<p>' + esc(p.excerpt) + '</p>' +
