@@ -223,7 +223,7 @@ The test suite does not need MySQL. It covers server-side item normalisation and
 
 The production site runs at **https://tastehub-kenya-production.up.railway.app**.
 
-- **Source:** the service is connected to `kariukimoses-254/tastehub-kenya` on `main`. Pushing to `main` triggers a Railway autodeploy, so no manual `railway up` is needed.
+- **Source:** the service is pointed at `kariukimoses-254/tastehub-kenya` on `main`. Push-triggered autodeploys require the Railway GitHub App to be authorized for the repository; until then, deploy with `railway up --ci` as shown below.
 - **Build:** the `Dockerfile` builds a `node:20-alpine` image; Railway detects it automatically from the repository root.
 - **Health check:** `/api/health` is configured in `railway.json`.
 - **Database:** a Railway MySQL service. The app service uses `DATABASE_*` reference variables pointing at the MySQL service (`${{MySQL.MYSQLHOST}}`, and so on). `server/config.js` also accepts Railway's native `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD` and `MYSQLDATABASE` when the `DATABASE_*` values are absent.
