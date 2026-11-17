@@ -1,0 +1,83 @@
+/* Shared site navigation — injected by /nav.js on every public page. */
+.th-nav {
+  position: relative;
+  z-index: 30;
+  background: #21170f;
+  color: #fff;
+  font: 600 13px/1.4 "Plus Jakarta Sans", Inter, system-ui, Arial, sans-serif;
+  border-bottom: 2px solid #ed7c2d;
+}
+
+.th-nav .inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 9px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+}
+
+.th-nav a {
+  color: #f7f3ef;
+  text-decoration: none;
+  padding: 6px 9px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+
+.th-nav a:hover,
+.th-nav a:focus-visible {
+  background: rgba(255, 255, 255, .13);
+  color: #fff;
+  outline: none;
+}
+
+.th-nav .brand {
+  margin-right: auto;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  padding-left: 0;
+}
+
+.th-nav .brand b {
+  color: #ed7c2d;
+}
+
+.th-nav .brand span {
+  font-weight: 500;
+  opacity: .7;
+  font-size: 12px;
+}
+
+.th-nav .group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+}
+
+.th-nav .group.staff {
+  border-left: 1px solid rgba(255, 255, 255, .28);
+  padding-left: 14px;
+}
+
+.th-nav .label {
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .6);
+  margin-right: 3px;
+}
+
+.th-nav a.active {
+  background: #ed7c2d;
+  color: #21170f;
+}
+
+@media (max-width: 720px) {
+  .th-nav .inner { padding: 8px 12px; gap: 4px 10px; }
+  .th-nav .group.staff { border-left: 0; padding-left: 0; width: 100%; }
+  .th-nav .brand { width: 100%; }
+}

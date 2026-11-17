@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteHub | Our Menu</title>
+<link rel="stylesheet" href="/pages.css">
+</head>
+<body>
+<header class="pagehead">
+  <div class="inner">
+    <div class="kicker">Fresh from our kitchens</div>
+    <h1>Our Menu</h1>
+    <p>Explore what is cooking at your branch today. Prices are in Kenyan shillings and dishes are prepared fresh to order.</p>
+  </div>
+</header>
+
+<main class="content">
+  <section class="card toolbar">
+    <label for="branch">Ordering from
+      <select id="branch"><option value="Nairobi">Loading branches…</option></select>
+    </label>
+    <div class="filters" id="filters" aria-label="Menu categories"></div>
+  </section>
+
+  <p class="muted" id="status" role="status">Loading the menu…</p>
+  <div class="grid" id="meals"></div>
+
+  <section class="card" id="offerCard">
+    <h3>Current offers</h3>
+    <div class="chips" id="offers"></div>
+  </section>
+
+  <p class="center">
+    <a class="btn" href="/#menu">Order from the home page &rarr;</a>
+    <a class="btn secondary" href="/contact.html">Questions? Contact us</a>
+  </p>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <div>
+      <strong>TasteHub Kenya</strong>
+      <p>Good food, great mood — at your branch and at your door.</p>
+    </div>
+    <nav aria-label="Footer navigation">
+      <a href="/">Home</a><a href="/menu.html">Menu</a><a href="/about.html">About</a>
+      <a href="/blog.html">Blog</a><a href="/contact.html">Contact</a>
+      <a href="/admin.html">HQ</a><a href="/branch.html">Branch</a>
+      <a href="/driver.html">Driver</a><a href="/confirm.html">Confirm</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="/nav.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var FALLBACK = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260">' +
+    '<rect width="400" height="260" fill="#f6e7d8"/>' +
+    '<text x="50%" y="53%" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" fill="#a2704c">TasteHub</text></svg>'
+  );
+
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var state = { branches: [], branch: '', category: 'All', meals: [] };
+
+  function useFallbackBranches() {
+    state.branches = [{ name: 'Nairobi', displayName: 'Nairobi Headquarters' }];
+    state.branch = 'Nairobi';
+    $('branch').innerHTML = '<option value="Nairobi">Nairobi Headquarters</option>';
+  }
+
+  function loadBranches() {
+    return fetch('/api/branches').then(function (r) {
+      if (!r.ok) throw new Error('branches');
+      return r.json();
+    }).then(function (list) {
+      state.branches = Array.isArray(list) ? list : [];
+      if (!state.branches.length) { useFallbackBranches(); loadMenu(); return; }
+      $('branch').innerHTML = state.branches.map(function (b) {
+        return '<option value="' + esc(b.name) + '">' + esc(b.displayName) + '</option>';
+      }).join('');
+      var saved = '';
+      try { saved = localStorage.getItem('tastehubBranch') || ''; } catch (e) {}
+      if (state.branches.some(function (b) { return b.name === saved; })) $('branch').value = saved;
+      state.branch = $('branch').value;
+      $('branch').onchange = function () {
+        state.branch = this.value;
+        try { localStorage.setItem('tastehubBranch', this.value); } catch (e) {}
+        loadMenu();
+      };
+      loadMenu();
+    }).catch(function () {
+      useFallbackBranches();
+      loadMenu();
+    });
+  }
+
+  function draw() {
+    var list = state.meals.filter(function (m) {
+      return state.category === 'All' || m.category === state.category;
+    });
+    $('meals').innerHTML = list.length ? list.map(function (m) {
+      return '<article class="card meal">' +
+        '<div class="pic"><img alt="' + esc(m.name) + '" src="' + esc(m.imageUrl || FALLBACK) + '" loading="lazy"></div>' +
+        '<div class="body">' +
+          '<span class="tag">' + esc(m.category || 'Dish') + '</span>' +
+          '<h3>' + esc(m.name) + '</h3>' +
+          '<p>' + esc(m.description) + '</p>' +
+          '<span class="price">KSh ' + Number(m.priceKes || 0).toLocaleString('en-KE') + '</span>' +
+          '<a class="btn secondary" href="/#menu">Add to order &rarr;</a>' +
+        '</div>' +
+      '</article>';
+    }).join('') : '<p class="muted">No dishes in this category right now.</p>';
+  }
+
+  function loadMenu() {
+    $('status').textContent = 'Loading the menu…';
+    fetch('/api/menu?branch=' + encodeURIComponent(state.branch)).then(function (r) {
+      if (!r.ok) throw new Error('menu');
+      return r.json();
+    }).then(function (data) {
+      state.meals = (data.meals || []).filter(function (m) { return m.available; });
+      var cats = (data.categories || []).slice();
+      if (cats.indexOf('All') === -1) cats.unshift('All');
+      if (cats.indexOf(state.category) === -1) state.category = 'All';
+      $('filters').innerHTML = cats.map(function (c) {
+        return '<button class="chip' + (c === state.category ? ' on' : '') + '" type="button" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+      }).join('');
+      draw();
+      var where = data.branch ? (data.branch.displayName || data.branch.name) : state.branch;
+      $('status').textContent = state.meals.length
+        ? state.meals.length + ' dishes available at ' + where + '.'
+        : 'No dishes are available at ' + where + ' right now.';
+
+      var promos = data.promotions || [];
+      $('offers').innerHTML = promos.length ? promos.map(function (p) {
+        return '<span class="chip">' + esc(p.code) + ' &middot; ' + esc(p.description || (p.discountPercent + '% off')) + '</span>';
+      }).join('') : '<p class="muted small">No promotions are running at the moment.</p>';
+    }).catch(function () {
+      $('status').textContent = 'We could not load the menu. Please try again shortly.';
+      $('filters').innerHTML = '';
+      $('meals').innerHTML = '';
+      $('offers').innerHTML = '';
+    });
+  }
+
+  $('filters').addEventListener('click', function (e) {
+    var button = e.target.closest('button[data-cat]');
+    if (!button) return;
+    state.category = button.getAttribute('data-cat');
+    Array.prototype.forEach.call($('filters').children, function (child) {
+      child.classList.toggle('on', child === button);
+    });
+    draw();
+  });
+
+  $('meals').addEventListener('error', function (e) {
+    if (e.target && e.target.tagName === 'IMG') e.target.src = FALLBACK;
+  }, true);
+
+  loadBranches();
+})();
+</script>
+</body>
+</html>

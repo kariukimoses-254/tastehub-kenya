@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteHub | Blog</title>
+<link rel="stylesheet" href="/pages.css">
+</head>
+<body>
+<header class="pagehead">
+  <div class="inner">
+    <div class="kicker">From the TasteHub kitchen</div>
+    <h1>The TasteHub Blog</h1>
+    <p>Notes on good food, our branches and the people who make your order happen. Pull up a chair and have a read.</p>
+  </div>
+</header>
+
+<main class="content">
+  <section class="card toolbar">
+    <div><h2 style="margin-bottom:4px">Latest stories</h2><span class="muted small" id="count"></span></div>
+    <div class="filters" id="filters" aria-label="Article categories"></div>
+  </section>
+
+  <div class="grid" id="posts"></div>
+
+  <section class="card">
+    <h2>Hungry yet?</h2>
+    <p class="muted">Everything you read about is on the menu at your local branch.</p>
+    <a class="btn" href="/menu.html">Browse today's menu &rarr;</a>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="inner">
+    <div>
+      <strong>TasteHub Kenya</strong>
+      <p>Good food, great mood — at your branch and at your door.</p>
+    </div>
+    <nav aria-label="Footer navigation">
+      <a href="/">Home</a><a href="/menu.html">Menu</a><a href="/about.html">About</a>
+      <a href="/blog.html">Blog</a><a href="/contact.html">Contact</a>
+      <a href="/admin.html">HQ</a><a href="/branch.html">Branch</a>
+      <a href="/driver.html">Driver</a><a href="/confirm.html">Confirm</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="/nav.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var posts = [
+    {
+      cat: 'Guides', date: '12 Sep 2026', read: '3 min read',
+      title: 'How to build the perfect Friday lunch order',
+      excerpt: 'A little planning turns a good lunch into a great one. Here is how our regulars do it.',
+      body: [
+        'Friday lunch is when every kitchen is busiest, so the best orders are the ones that are easy to prepare and easy to carry. Start with one main dish that travels well — biryani, grilled chicken or a hearty pasta are all good choices — then add something fresh on the side.',
+        'If you are ordering for a team, choose from the same branch and place one order rather than ten. It keeps the food consistent, reduces packaging and means our drivers only make one stop. You can add a note for the kitchen when you check out if anyone has an allergy or a preference.',
+        'Finally, pick delivery if you are more than a short walk away. Your food arrives hot, and the confirmation link in your email lets you tell us straight away if anything is not right.'
+      ]
+    },
+    {
+      cat: 'Kitchen', date: '28 Aug 2026', read: '4 min read',
+      title: 'Behind the pass: what "fresh daily" really means',
+      excerpt: 'We follow the food from the delivery crate to your plate. No mystery, just a few simple rules.',
+      body: [
+        'Fresh daily starts in the morning. Each branch checks what was used the day before, what is in stock and what the local regulars tend to order. That list becomes the prep plan — nothing is cooked in bulk and left sitting around for tomorrow.',
+        'Meals are prepared to order. Spices are toasted, sauces are finished and garnishes are added when your order comes in, not hours earlier. It takes a little longer at busy times, but it is the reason the biryani arrives fragrant and the chips are still crisp.',
+        'At the end of the day, anything that can be safely stored is labelled and dated; anything that cannot is recorded and discarded. Branch managers review that log every week, and headquarters reviews it with them. It is unglamorous work, and it is the most important thing we do.'
+      ]
+    },
+    {
+      cat: 'Favourites', date: '14 Aug 2026', read: '2 min read',
+      title: 'Five branch favourites to try this month',
+      excerpt: 'From creamy paneer to a proper chocolate lava cake — five dishes worth making room for.',
+      body: [
+        'Chicken Biryani is still the dish people talk about most. Long-grain rice, warm spices and tender chicken make it the order that converts first-timers into regulars.',
+        'For something different, try the Paneer Butter Masala with rice, or go for a Crispy Chicken Burger when you want comfort food. The Margherita Pizza is a reliable crowd-pleaser for shared lunches, and the Chocolate Lava Cake is the sweet finish that needs no explanation.',
+        'Availability changes by branch, so open the menu, select your branch and see what is cooking near you today.'
+      ]
+    },
+    {
+      cat: 'Guides', date: '30 Jul 2026', read: '3 min read',
+      title: 'A smarter way to order for the whole office',
+      excerpt: 'One branch, one order, one delivery. A short guide to feeding a team without the chaos.',
+      body: [
+        'Office orders go wrong when everyone orders separately. You get five delivery fees, five arrival times and a queue at the reception desk. Collect the choices first, then place a single order from one branch.',
+        'Use the notes field to list names against dishes, and ask the team to collect from one place. If someone is running late, their food stays with the group instead of going cold in a separate bag.',
+        'For larger teams, check the branch details on the menu page for minimum order values and delivery fees. If you need something regular, send us a message through the contact page and we will point you at the branch best placed to help.'
+      ]
+    }
+  ];
+
+  var state = { category: 'All' };
+  var categories = ['All'].concat(posts.map(function (p) { return p.cat; }).filter(function (c, i, a) {
+    return a.indexOf(c) === i;
+  }));
+
+  function draw() {
+    var list = posts.filter(function (p) {
+      return state.category === 'All' || p.cat === state.category;
+    });
+    document.getElementById('count').textContent = list.length + ' article' + (list.length === 1 ? '' : 's');
+    document.getElementById('posts').innerHTML = list.map(function (p, index) {
+      return '<article class="card post" data-post="' + index + '">' +
+        '<div class="meta"><span class="tag">' + esc(p.cat) + '</span><span>' + esc(p.date) + '</span><span>&middot;</span><span>' + esc(p.read) + '</span></div>' +
+        '<h2>' + esc(p.title) + '</h2>' +
+        '<p>' + esc(p.excerpt) + '</p>' +
+        '<button class="linkbtn" type="button" data-toggle>Read article &rarr;</button>' +
+        '<div class="body">' + p.body.map(function (para) {
+          return '<p>' + esc(para) + '</p>';
+        }).join('') + '</div>' +
+      '</article>';
+    }).join('');
+  }
+
+  document.getElementById('filters').innerHTML = categories.map(function (c) {
+    return '<button class="chip' + (c === 'All' ? ' on' : '') + '" type="button" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+  }).join('');
+
+  document.getElementById('filters').addEventListener('click', function (e) {
+    var button = e.target.closest('button[data-cat]');
+    if (!button) return;
+    state.category = button.getAttribute('data-cat');
+    Array.prototype.forEach.call(this.children, function (child) {
+      child.classList.toggle('on', child === button);
+    });
+    draw();
+  });
+
+  document.getElementById('posts').addEventListener('click', function (e) {
+    var button = e.target.closest('button[data-toggle]');
+    if (!button) return;
+    var article = button.closest('.post');
+    var open = article.classList.toggle('open');
+    button.textContent = open ? 'Close article ↑' : 'Read article →';
+  });
+
+  draw();
+})();
+</script>
+</body>
+</html>
