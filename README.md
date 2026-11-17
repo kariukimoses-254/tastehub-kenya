@@ -1,5 +1,7 @@
 # TasteHub Kenya — multi-branch restaurant ordering
 
+**[Live demo →](https://tastehub-kenya-production.up.railway.app)** (production deployment on Railway)
+
 TasteHub uses one shared brand, but every order belongs to exactly one selected branch. Nairobi is the confirmed headquarters. Mombasa, Kisumu, Nakuru and Eldoret are example branches; replace or reconfigure them with the outlets that actually operate before launch.
 
 The app now has a launch-hardened ordering flow: branch-specific menus and prices, server-side order validation, delivery fees and minimum orders, the `TASTE30` promotion, an order status workflow, a central HQ dashboard, and role-scoped branch manager API access.
